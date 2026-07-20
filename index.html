@@ -29,12 +29,10 @@
 
 body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* Anti-PrintScreen CSS Filter */
 @media print {
   body { display: none !important; }
 }
 
-/* Topbar */
 .topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; }
 .topbar-brand { display: flex; align-items: center; gap: 0.75rem; margin: 0 auto; }
 .topbar-brand img { height: 40px; width: auto; object-fit: contain; }
@@ -42,11 +40,9 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 .topbar-subtitle { font-size: 0.7rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
 .btn-teacher { position: absolute; right: 1.5rem; background: #f1f5f9; border: 1px solid var(--slate-300); padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
 
-/* Layout Screens */
 .screen { display: none; flex: 1; height: calc(100vh - 60px); }
 .screen.active { display: flex; }
 
-/* Login */
 #screen-login { align-items: center; justify-content: center; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
 .login-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 2.5rem; width: 100%; max-width: 460px; text-align: center; }
 .protocol-tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 0.3rem 0.8rem; border-radius: 1rem; font-weight: 800; font-size: 0.75rem; margin-top: 0.5rem; }
@@ -59,12 +55,11 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 .btn-primary { background: var(--primary); color: white; }
 .btn-outline { background: white; color: var(--slate-600); border: 1.5px solid var(--slate-300); }
 .btn-danger { background: var(--red); color: white; }
+.btn-success { background: var(--green); color: white; }
 
-/* Welcome */
 #screen-welcome { align-items: center; justify-content: center; background: var(--bg-main); padding: 2rem; }
 .welcome-card { background: white; border-radius: var(--radius); padding: 2.5rem; max-width: 650px; width: 100%; box-shadow: var(--shadow-lg); }
 
-/* Exam Screen */
 #screen-answers { width: 100%; height: calc(100vh - 60px); flex-direction: row; }
 .pdf-pane { width: 88%; height: 100%; background: #525659; }
 .pdf-pane iframe { width: 100%; height: 100%; border: none; }
@@ -79,14 +74,12 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 
 .answers-list { flex: 1; overflow-y: auto; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.25rem; }
 
-/* Fila Horizontal por Pregunta */
 .q-row-line { display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 0.25rem 0.4rem; border-radius: 0.3rem; border: 1px solid var(--slate-300); }
 .q-num-inline { font-size: 0.65rem; font-weight: 900; min-width: 28px; }
 .q-opts-inline { display: flex; gap: 0.15rem; align-items: center; flex-wrap: wrap; }
 .opt-bubble { width: 19px; height: 19px; border-radius: 50%; border: 1px solid var(--slate-300); background: white; font-size: 0.55rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .opt-bubble.selected { background: var(--primary); color: white; border-color: var(--primary); }
 
-/* Warning Modal Center (3 Seconds) */
 #center-warning-modal {
   position: fixed;
   inset: 0;
@@ -114,7 +107,6 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
   to { transform: scale(1); opacity: 1; }
 }
 
-/* Modals */
 .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
 .modal-overlay.open { display: flex; }
 .modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
@@ -143,7 +135,6 @@ th { background: #f1f5f9; font-weight: 800; }
   <p>Cargando Plataforma SABER TECH…</p>
 </div>
 
-<!-- ALERTA CENTRAL DE 3 SEGUNDOS -->
 <div id="center-warning-modal">
   <div class="warning-card">
     <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚠️</div>
@@ -269,7 +260,7 @@ th { background: #f1f5f9; font-weight: 800; }
   </div>
 </div>
 
-<!-- PANEL DOCENTE PROFESIONAL -->
+<!-- PANEL DOCENTE -->
 <div class="modal-overlay" id="modal-teacher">
   <div class="modal-box">
     <h3 style="margin-bottom:0.8rem;font-weight:900;">⚙️ Panel de Control Docente</h3>
@@ -334,7 +325,7 @@ th { background: #f1f5f9; font-weight: 800; }
         </div>
       </div>
 
-      <!-- TAB 3: INGLÉS CONFIGURACIÓN INDIVIDUAL DE PREGUNTAS -->
+      <!-- TAB 3: INGLÉS -->
       <div id="tab-ingles" class="t-content" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
           <p style="font-size:0.75rem; font-weight:800;">Formato por Pregunta de Inglés:</p>
@@ -352,9 +343,13 @@ th { background: #f1f5f9; font-weight: 800; }
         <div class="ingles-grid" id="ingles-questions-grid"></div>
       </div>
 
-      <!-- TAB 4: REPORTES -->
+      <!-- TAB 4: REPORTES Y DESCARGAS -->
       <div id="tab-reportes" class="t-content" style="display:none;">
-        <p style="font-size:0.8rem; font-weight:800;">Respuestas Registradas</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+          <p style="font-size:0.8rem; font-weight:800;">Respuestas Registradas</p>
+          <button class="btn btn-success" style="width:auto; padding:0.3rem 0.6rem; font-size:0.75rem;" onclick="descargarInformeExcel()">📊 Descargar Informe CSV</button>
+        </div>
+        
         <div style="max-height:130px; overflow-y:auto; margin-bottom:1rem;">
           <table id="tbl-respuestas">
             <thead><tr><th>Fecha</th><th>Estudiante</th><th>Grado</th><th>Sesión</th><th>Respondidas</th></tr></thead>
@@ -423,7 +418,7 @@ let STATE = {
     minutos: 30,
     s1: { mat: 25, lec: 41, soc: 25, cn: 29 },
     s2: { soc: 25, mat: 25, cn: 29, ing: 55 },
-    inglesMap: {} // Guarda las opciones individuales por pregunta: e.g. { P79: ['A','B','C'], P80: ['A','B','C','D'] }
+    inglesMap: {}
   },
   timerInterval: null,
   timeRemaining: 0
@@ -661,7 +656,6 @@ function cargarPreguntasArea(itemArea){
     const pregGlobalNum = itemArea.offset + i;
     const qKey = `P${pregGlobalNum}`;
     
-    // Si es inglés, buscar opciones dinámicas personalizadas por pregunta
     let opciones = itemArea.opts || ['A','B','C','D'];
     if(itemArea.isIngles) {
       opciones = STATE.config.inglesMap[qKey] || ['A','B','C','D'];
@@ -747,9 +741,6 @@ function finalizarExamen(){
   document.getElementById('modal-report').classList.add('open');
 }
 
-/* ============================================================
-   SISTEMA DE SEGURIDAD Y ADVERTENCIAS DE 3 SEGUNDOS
-============================================================ */
 function triggerWarning(msg) {
   if(!STATE.examActive) return;
 
@@ -759,7 +750,6 @@ function triggerWarning(msg) {
   document.getElementById('warning-msg-text').textContent = msg;
   modal.classList.add('active');
 
-  // Registrar en backend
   try {
     fetch(GAS_URL, {
       method: 'POST',
@@ -772,7 +762,6 @@ function triggerWarning(msg) {
     });
   } catch(e){}
 
-  // Ocultar exactamente a los 3 segundos (3000ms)
   if(STATE.warningTimeout) clearTimeout(STATE.warningTimeout);
   STATE.warningTimeout = setTimeout(() => {
     modal.classList.remove('active');
@@ -780,24 +769,20 @@ function triggerWarning(msg) {
 }
 
 function initAntiCheating(){
-  // 1. Detección de cambio de pestaña / ventana
   window.addEventListener('blur', () => triggerWarning("Intento de abandono de pantalla / cambio de pestaña."));
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) triggerWarning("Ventana minimizada o fuera de foco.");
   });
 
-  // 2. Bloqueo de Teclado (Copiar, Pegar, Captura, Herramientas dev)
   document.addEventListener('keydown', (e) => {
     if(!STATE.examActive) return;
 
-    // Tecla PrintScreen (Captura de pantalla)
     if (e.key === 'PrintScreen' || e.keyCode === 44) {
       triggerWarning("Intento de captura de pantalla detectado (PrintScreen)");
       e.preventDefault();
       return false;
     }
 
-    // Atajos con Ctrl o Cmd
     if (e.ctrlKey || e.metaKey) {
       const k = e.key.toLowerCase();
       if (k === 'c') { triggerWarning("Acción bloqueada: Intento de copiar contenido"); e.preventDefault(); }
@@ -809,22 +794,17 @@ function initAntiCheating(){
       if (k === 's') { triggerWarning("Acción bloqueada: Guardar página"); e.preventDefault(); }
     }
 
-    // F12 o Ctrl+Shift+I / J
     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j'))) {
       triggerWarning("Acción bloqueada: Acceso a Herramientas de Desarrollo");
       e.preventDefault();
     }
   });
 
-  // 3. Bloqueo de copia con ratón / selección
   document.addEventListener('copy', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Copiar texto"); e.preventDefault(); } });
   document.addEventListener('paste', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Pegar texto"); e.preventDefault(); } });
   document.addEventListener('cut', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Cortar texto"); e.preventDefault(); } });
 }
 
-/* ============================================================
-   PANEL DOCENTE Y CONFIGURACIÓN DINÁMICA DE INGLÉS
-============================================================ */
 function abrirModalDocente(){
   document.getElementById('teacher-pass-input').value = '';
   document.getElementById('teacher-auth-step').style.display = 'block';
@@ -938,10 +918,37 @@ async function cargarReportesDocente(){
   } catch(e){}
 }
 
+async function descargarInformeExcel(){
+  try {
+    showToast('Generando informe...', 'success');
+    const r = await fetch(GAS_URL + '?action=getMatrizResultados');
+    const data = await r.json();
+    if(data.success && data.matriz){
+      let csvContent = "\uFEFF"; // BOM para UTF-8 en Excel
+      data.matriz.forEach(rowArray => {
+        let row = rowArray.map(item => `"${(item || '').toString().replace(/"/g, '""')}"`).join(";");
+        csvContent += row + "\r\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Informe_SABER_TECH_${new Date().toISOString().substring(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      showToast('No hay resultados para exportar', 'error');
+    }
+  } catch(e) {
+    showToast('Error al descargar el informe', 'error');
+  }
+}
+
 async function guardarConfiguracionDocente(){
   const pass = document.getElementById('teacher-pass-input').value.trim();
 
-  // Mapear opciones individuales de inglés
   const inglesMap = {};
   document.querySelectorAll('.cfg-ing-select').forEach(sel => {
     const key = sel.getAttribute('data-qkey');
