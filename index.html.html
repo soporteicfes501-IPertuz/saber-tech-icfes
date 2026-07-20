@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SABER TECH · Sistema ICFES</title>
+<title>SABER TECH · Sistema ICFES I.E.D. San José de Sitionuevo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -18,432 +18,240 @@
   --shadow-sm:0 4px 16px -2px rgba(15,23,42,.08);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--slate-50);color:var(--slate);min-height:100vh;line-height:1.5}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--slate-50);color:var(--slate);min-height:100vh;line-height:1.5;display:flex;flex-direction:column}
 
 /* TOPBAR */
-.topbar{background:white;border-bottom:1px solid var(--slate-300);padding:0 1.5rem;height:70px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
-.topbar-brand{display:flex;align-items:center;gap:.75rem;font-weight:800;font-size:1.1rem;letter-spacing:-.02em}
-.topbar-brand img{height:46px;width:auto;object-fit:contain}
-.topbar-subtitle{font-size:.68rem;color:var(--slate-600);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-.topbar-credit{font-size:.65rem;color:var(--blue-dark);font-weight:700;letter-spacing:.02em;background:var(--blue-light);padding:.25rem .6rem;border-radius:1rem;border:1px solid rgba(37,99,235,.2)}
+.topbar{background:white;border-bottom:1px solid var(--slate-300);padding:0 1.5rem;height:75px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+.topbar-brand{display:flex;align-items:center;gap:1rem;font-weight:800;font-size:1.1rem;letter-spacing:-.02em}
+.topbar-brand img{height:52px;width:auto;object-fit:contain}
+.topbar-subtitle{font-size:.7rem;color:var(--slate-600);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.topbar-credit{font-size:.7rem;color:var(--blue-dark);font-weight:800;letter-spacing:.02em;background:var(--blue-light);padding:.35rem .8rem;border-radius:1rem;border:1px solid rgba(37,99,235,.2)}
 
 /* SCREENS */
-.screen{display:none}
+.screen{display:none;flex:1}
 .screen.active{display:block}
 
 /* CARDS */
-.card{background:white;border-radius:var(--r-xl);box-shadow:var(--shadow);padding:2.5rem;border:1px solid rgba(203,213,225,.5)}
+.card{background:white;border-radius:var(--r-xl);box-shadow:var(--shadow);padding:2.5rem;border:1px solid rgba(203,213,225,.6)}
 .card-sm{background:white;border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:1.5rem;border:1px solid rgba(203,213,225,.4)}
 
 /* LOGIN */
-#screen-login{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:2rem 1rem;background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 50%,#f0fdf4 100%)}
-.login-container{width:100%;max-width:500px}
+#screen-login{display:none;min-height:calc(100vh - 75px);align-items:center;justify-content:center;padding:2rem 1rem;background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 50%,#f0fdf4 100%)}
+#screen-login.active{display:flex;flex-direction:column}
+.login-container{width:100%;max-width:520px}
 .login-logo{text-align:center;margin-bottom:1.5rem}
-.login-logo img{height:85px;margin-bottom:.5rem}
-.login-logo h1{font-size:1.5rem;font-weight:900;letter-spacing:-.03em;color:var(--slate-800)}
-.login-logo h2{font-size:1rem;font-weight:700;color:var(--blue);margin-top:.1rem}
-.login-logo p{font-size:.85rem;color:var(--slate-600);margin-top:.2rem}
+.login-logo img{height:95px;margin-bottom:.75rem;object-fit:contain}
+.login-logo h1{font-size:1.45rem;font-weight:900;letter-spacing:-.03em;color:var(--slate-800);line-height:1.2}
+.login-logo h2{font-size:1.05rem;font-weight:700;color:var(--blue);margin-top:.25rem}
+.login-logo p{font-size:.85rem;color:var(--slate-600);margin-top:.2rem;font-weight:500}
+
 .form-group{margin-bottom:1.25rem}
-.form-label{display:block;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-600);margin-bottom:.5rem}
-.form-select,.form-input{width:100%;padding:.875rem 1rem;border:1.5px solid var(--slate-300);border-radius:var(--r-md);font-size:1rem;color:var(--slate);background:white;transition:border-color .15s,box-shadow .15s;appearance:none}
-.form-select:focus,.form-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-.select-wrapper{position:relative}
-.select-wrapper::after{content:'▾';position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:var(--slate-600);pointer-events:none}
+.form-label{display:block;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--slate-600);margin-bottom:.4rem}
+.form-select,.form-input{width:100%;padding:.875rem 1rem;border:1.5px solid var(--slate-300);border-radius:var(--r-md);font-size:.95rem;color:var(--slate);background:white;transition:border-color .15s,box-shadow .15s}
+.form-select:focus,.form-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.875rem 1.5rem;border-radius:var(--r-md);font-size:.95rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none}
-.btn-primary{background:var(--blue);color:white;width:100%;font-size:1rem}
-.btn-primary:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.875rem 1.5rem;border-radius:var(--r-md);font-size:.95rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--blue);color:white;width:100%}
+.btn-primary:hover:not(:disabled){background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.3)}
 .btn-outline{background:white;color:var(--slate);border:1.5px solid var(--slate-300)}
 .btn-outline:hover{border-color:var(--blue);color:var(--blue)}
 .btn-ghost{background:transparent;color:var(--slate-600)}
-.btn-ghost:hover{background:var(--slate-100)}
+.btn-ghost:hover{background:var(--slate-100);color:var(--slate-800)}
 .btn-success{background:var(--green);color:white}
-.btn-success:hover{background:#15803d}
 .btn-sm{padding:.5rem 1rem;font-size:.85rem}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none!important}
 
-/* ANSWERS SCREEN */
-#screen-answers{padding-bottom:6rem}
-.answers-header{background:white;border-bottom:1px solid var(--slate-300);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-.student-badge{display:flex;align-items:center;gap:.625rem;background:var(--blue-light);border:1.5px solid rgba(37,99,235,.2);border-radius:3rem;padding:.5rem 1rem}
-.student-badge .avatar{width:32px;height:32px;background:var(--blue);border-radius:50%;color:white;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}
-.student-badge .name{font-weight:600;font-size:.9rem}
-.student-badge .curso{font-size:.78rem;color:var(--slate-600)}
-.session-tabs-wrap{background:white;border-bottom:2px solid var(--slate-100);padding:0 1.5rem;display:flex}
-.session-tab{padding:1rem 1.5rem;font-size:.9rem;font-weight:600;color:var(--slate-600);cursor:pointer;border:none;background:transparent;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap}
-.session-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.area-tabs-wrap{padding:1rem 1.5rem .5rem;display:flex;gap:.5rem;overflow-x:auto;scrollbar-width:none}
-.area-tabs-wrap::-webkit-scrollbar{display:none}
-.area-tab{padding:.5rem 1.125rem;border-radius:3rem;font-size:.82rem;font-weight:600;cursor:pointer;border:1.5px solid var(--slate-300);background:white;color:var(--slate-600);white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:.4rem}
-.area-tab.active{background:var(--blue);border-color:var(--blue);color:white}
-.area-tab .counter{font-size:.7rem;background:rgba(0,0,0,.12);border-radius:1rem;padding:.1rem .4rem}
-.area-tab.active .counter{background:rgba(255,255,255,.25)}
-.progress-wrap{padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;background:white;border-bottom:1px solid var(--slate-100)}
-.progress-bar{flex:1;height:6px;background:var(--slate-100);border-radius:3px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),#60a5fa);border-radius:3px;transition:width .3s ease}
-.progress-label{font-size:.8rem;color:var(--slate-600);font-weight:500;white-space:nowrap}
-.questions-container{padding:1.25rem 1.5rem}
-.area-section{margin-bottom:1.5rem}
-.question-row{display:grid;grid-template-columns:2.5rem 1fr;gap:.5rem;align-items:center;margin-bottom:.5rem}
-.q-number{font-size:.8rem;font-weight:700;color:var(--slate-600);text-align:right;padding-right:.25rem}
-.q-options{display:flex;gap:.375rem;flex-wrap:wrap}
-.ans-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--slate-300);background:white;font-size:.78rem;font-weight:700;color:var(--slate-600);cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ans-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);transform:scale(1.08)}
-.ans-btn.selected{background:var(--blue);border-color:var(--blue);color:white;transform:scale(1.05);box-shadow:0 3px 10px rgba(37,99,235,.35)}
-.q-options.opts-8{display:grid;grid-template-columns:repeat(4,38px);gap:.375rem}
-.eng-part-header{background:linear-gradient(135deg,#eff6ff,#e0f2fe);border:1px solid rgba(37,99,235,.15);border-radius:var(--r-md);padding:.625rem 1rem;margin-bottom:.75rem;font-size:.8rem;font-weight:600;color:#1d4ed8}
-.bottom-actions{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--slate-300);padding:1rem 1.5rem;display:flex;gap:.75rem;align-items:center;box-shadow:0 -8px 24px rgba(15,23,42,.08);z-index:99}
-.bottom-actions .spacer{flex:1}
-.offline-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;padding:.3rem .75rem;border-radius:3rem;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
-.offline-badge.online{background:#dcfce7;color:#14532d;border-color:#86efac}
+/* FOOTER */
+.app-footer{text-align:center;padding:1.5rem;background:white;border-top:1px solid var(--slate-300);font-size:.78rem;font-weight:700;color:var(--slate-600);margin-top:auto}
 
 /* MODALS */
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.65);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
 .modal-overlay.open{display:flex}
 .modal-box{background:white;border-radius:var(--r-xl);padding:2rem;max-width:480px;width:100%;box-shadow:0 40px 80px rgba(15,23,42,.25)}
-.modal-title{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.75rem}
+.modal-title{font-size:1.25rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.75rem}
 .modal-body{color:var(--slate-600);font-size:.9rem;line-height:1.6;margin-bottom:1.25rem}
-.modal-actions{display:flex;gap:.75rem;flex-wrap:wrap}
-.modal-actions .btn{flex:1;min-width:120px}
+.modal-actions{display:flex;gap:.75rem;margin-top:1.25rem}
+.modal-actions .btn{flex:1}
 
-/* MANAGER */
-#screen-manager{min-height:100vh;background:var(--slate-50);padding:2rem 1rem}
-.manager-wrap{max-width:700px;margin:0 auto}
-.queue-item{display:flex;align-items:center;justify-content:space-between;padding:.875rem 1rem;border:1.5px solid var(--slate-300);border-radius:var(--r-md);background:white;margin-bottom:.5rem;gap:.75rem}
-.queue-item-info{flex:1;min-width:0}
-.queue-item-name{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.queue-item-meta{font-size:.78rem;color:var(--slate-600)}
-.pending-indicator{display:inline-flex;align-items:center;gap:.35rem;font-size:.78rem;font-weight:600;padding:.3rem .75rem;border-radius:3rem;background:#fef3c7;color:#92400e;cursor:pointer}
+/* EXAM UI & MANAGER UI */
+.answers-header{background:white;border-bottom:1px solid var(--slate-300);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.student-badge{display:flex;align-items:center;gap:.625rem;background:var(--blue-light);border:1.5px solid rgba(37,99,235,.2);border-radius:3rem;padding:.5rem 1rem}
+.student-badge .avatar{width:34px;height:34px;background:var(--blue);border-radius:50%;color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem}
 
-/* TOAST */
-#toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--slate);color:white;padding:.875rem 1.5rem;border-radius:var(--r-md);font-size:.9rem;font-weight:500;z-index:300;transition:transform .25s ease;white-space:nowrap;box-shadow:var(--shadow);max-width:90vw;text-align:center}
+#screen-manager{padding:2rem 1rem;background:var(--slate-50)}
+.manager-wrap{max-width:750px;margin:0 auto}
+
+/* TOAST & LOADING */
+#toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--slate);color:white;padding:.875rem 1.75rem;border-radius:var(--r-md);font-size:.9rem;font-weight:600;z-index:300;transition:transform .25s ease;box-shadow:var(--shadow)}
 #toast.show{transform:translateX(-50%) translateY(0)}
 #toast.success{background:var(--green)}
 #toast.error{background:var(--red)}
 
-/* LOADING */
-.loading-overlay{position:fixed;inset:0;background:rgba(248,250,252,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:400;gap:1rem}
-.loading-spinner-lg{width:48px;height:48px;border:4px solid var(--slate-100);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+.loading-overlay{position:fixed;inset:0;background:rgba(248,250,252,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:400;gap:1rem}
+.loading-spinner-lg{width:48px;height:48px;border:4px solid var(--slate-300);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* REPORT SCREEN */
-#screen-report{min-height:100vh;background:var(--slate-50);padding:1.5rem 1rem 5rem}
-.report-wrap{max-width:860px;margin:0 auto}
-.report-locked{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;gap:1.5rem}
-.lock-icon{width:80px;height:80px;background:var(--slate-100);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
-#pdf-report{background:white;width:794px;min-height:1123px;margin:0 auto;padding:2.5rem;border-radius:2rem;box-shadow:0 32px 80px rgba(15,23,42,.18);position:relative}
-
-/* UTILS */
-.divider{height:1px;background:var(--slate-100);margin:1rem 0}
-.badge{display:inline-flex;padding:.2rem .6rem;border-radius:3rem;font-size:.72rem;font-weight:700;text-transform:uppercase}
-.badge-amber{background:#fef3c7;color:#92400e}
-.flex{display:flex}
-.items-center{align-items:center}
-.justify-between{justify-content:space-between}
-.gap-1{gap:.5rem}
-.mt-1{margin-top:.5rem}
-.mt-2{margin-top:1rem}
-.text-sm{font-size:.875rem}
-.text-slate{color:var(--slate-600)}
-
-@media(max-width:600px){
-  .card{padding:1.5rem 1rem}
-  .topbar{padding:0 .75rem}
-  .topbar-credit{display:none}
-  #pdf-report{width:100%;padding:1.25rem}
-}
 </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loading-overlay">
   <div class="loading-spinner-lg"></div>
-  <p style="color:var(--slate-600);font-size:.95rem;font-weight:600">Cargando base de datos institucional…</p>
+  <p style="color:var(--slate-800);font-size:1rem;font-weight:700">Cargando datos institucionales…</p>
 </div>
 
 <div id="toast"></div>
 
-<!-- TOPBAR -->
+<!-- TOPBAR ENCABEZADO -->
 <div class="topbar">
   <div class="topbar-brand">
-    <img src="IMAGENSANJOSE.png" alt="Logo ISJ" id="topbar-logo">
+    <img src="IMAGENSANJOSE.png" alt="Logo I.E.D. San José de Sitionuevo" id="topbar-logo">
     <div>
-      <div style="font-size:.95rem">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
-      <div class="topbar-subtitle">Sistema de Entrenamiento ICFES</div>
+      <div style="font-size:1rem;font-weight:900;color:var(--slate-800)">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
+      <div class="topbar-subtitle">Sistema Digital de Entrenamientos Saber 11</div>
     </div>
   </div>
   <div class="topbar-credit">DESARROLLADO POR LA SABER TECH, BY ISRAEL PERTUZ</div>
-  <div style="display:flex;gap:.5rem;align-items:center" id="topbar-actions"></div>
 </div>
 
-<!-- ══ SCREEN 1: LOGIN ══════════════════════════════ -->
+<!-- ══ SCREEN 1: LOGIN / SELECCIÓN ════════════════════ -->
 <div id="screen-login" class="screen active">
   <div class="login-container">
     <div class="login-logo">
       <img src="IMAGENSANJOSE.png" alt="Logo Institucional">
       <h1>I.E.D. SAN JOSÉ DE SITIONUEVO</h1>
       <h2>Plataforma de Simulación Saber 11</h2>
-      <p>SABER TECH · Protocolo Digital de Evaluaciones</p>
+      <p>Acompañamiento Evaluativo e Innovación Digital</p>
     </div>
-    <div class="card" style="margin-bottom:1rem">
 
+    <div class="card">
       <div class="form-group">
         <label class="form-label">Protocolo de Entrenamiento</label>
-        <div class="select-wrapper">
-          <select class="form-select" id="select-protocolo">
-            <option value="">Seleccionar protocolo…</option>
-          </select>
-        </div>
+        <select class="form-select" id="select-protocolo" onchange="validarFormLogin()">
+          <option value="">Seleccionar protocolo…</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label class="form-label">Grado / Curso</label>
-        <div class="select-wrapper">
-          <select class="form-select" id="select-curso" onchange="filtrarEstudiantesPorCurso()">
-            <option value="">Seleccionar grado…</option>
-          </select>
-        </div>
+        <select class="form-select" id="select-curso" onchange="filtrarEstudiantesPorCurso()">
+          <option value="">Seleccionar grado…</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label class="form-label">Estudiante</label>
-        <div class="select-wrapper" id="estudiante-wrapper">
-          <select class="form-select" id="select-estudiante" disabled>
-            <option value="">Primero selecciona tu grado…</option>
-          </select>
-        </div>
+        <select class="form-select" id="select-estudiante" onchange="validarFormLogin()" disabled>
+          <option value="">Primero selecciona tu grado…</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label class="form-label">Sesión a Responder</label>
-        <div class="select-wrapper">
-          <select class="form-select" id="select-sesion">
-            <option value="S1">Sesión 1 · Mañana</option>
-            <option value="S2">Sesión 2 · Tarde</option>
-          </select>
-        </div>
+        <select class="form-select" id="select-sesion" onchange="validarFormLogin()">
+          <option value="S1">Sesión 1 · Mañana</option>
+          <option value="S2">Sesión 2 · Tarde</option>
+        </select>
       </div>
 
       <button class="btn btn-primary" id="btn-iniciar" onclick="solicitarAccesoEstudiante()" disabled>
         Comenzar a Responder →
       </button>
 
-      <div class="divider"></div>
+      <div style="height:1px;background:var(--slate-300);margin:1.5rem 0"></div>
 
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="mostrarReport()">📊 Ver Mi Informe</button>
-        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="solicitarAccesoProfesor()">🖥️ Panel Profesor</button>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="solicitarAccesoProfesor()">🖥️ Panel Profesor (Protegido)</button>
       </div>
     </div>
-    <p style="text-align:center;font-size:.72rem;color:var(--slate-400);font-weight:600">
-      DESARROLLADO POR LA SABER TECH, BY ISRAEL PERTUZ
-    </p>
   </div>
 </div>
 
-<!-- ══ MODAL DE PROTOCOLO DE LOGUEO Y CONTRASEÑA ════════ -->
+<!-- ══ MODAL DE SEGURIDAD / CREAR O INGRESAR CONTRASEÑA ══ -->
 <div class="modal-overlay" id="modal-auth">
   <div class="modal-box">
-    <div class="modal-title" id="auth-modal-title">🔐 Protocolo de Seguridad</div>
-    <div class="modal-body" id="auth-modal-body">
-      Ingresa tu contraseña para continuar.
-    </div>
+    <div class="modal-title" id="auth-modal-title">🔐 Autenticación de Usuario</div>
+    <div class="modal-body" id="auth-modal-body">Ingresa tus datos para continuar.</div>
+    
     <div class="form-group">
       <label class="form-label" id="auth-label-pass">Contraseña</label>
-      <input type="password" class="form-input" id="auth-input-pass" placeholder="Ingresa tu contraseña…">
+      <input type="password" class="form-input" id="auth-input-pass" placeholder="Escribe tu clave aquí…">
     </div>
+
     <div class="form-group" id="auth-confirm-group" style="display:none">
       <label class="form-label">Confirmar Contraseña</label>
-      <input type="password" class="form-input" id="auth-input-pass-confirm" placeholder="Repite tu contraseña…">
+      <input type="password" class="form-input" id="auth-input-pass-confirm" placeholder="Repite tu clave aquí…">
     </div>
+
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="cerrarModal('modal-auth')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-confirm-auth" onclick="ejecutarAutenticacion()">Continuar</button>
+      <button class="btn btn-primary" id="btn-confirm-auth" onclick="ejecutarAutenticacion()">Ingresar</button>
     </div>
   </div>
 </div>
 
-<!-- ══ SCREEN 2: RESPUESTAS ═════════════════════════ -->
+<!-- ══ SCREEN 2: EXAMEN / RESPUESTAS ═════════════════ -->
 <div id="screen-answers" class="screen">
   <div class="answers-header">
     <div class="student-badge">
-      <div class="avatar" id="avatar-initials">JD</div>
+      <div class="avatar" id="avatar-initials">--</div>
       <div>
-        <div class="name" id="display-nombre">Nombre</div>
-        <div class="curso" id="display-info">Grado · Protocolo</div>
+        <div style="font-weight:800;font-size:.95rem" id="display-nombre">Nombre Estudiante</div>
+        <div style="font-size:.78rem;color:var(--slate-600)" id="display-info">Grado · Protocolo</div>
       </div>
     </div>
     <div style="flex:1"></div>
-    <div id="connection-badge" class="offline-badge">⚡ Local</div>
+    <button class="btn btn-outline btn-sm" onclick="mostrarLogin()">← Salir</button>
   </div>
-  <div class="session-tabs-wrap">
-    <button class="session-tab active" id="tab-s1" onclick="cambiarSession('S1')">📋 Sesión 1 · Mañana</button>
-    <button class="session-tab" id="tab-s2" onclick="cambiarSession('S2')">📋 Sesión 2 · Tarde</button>
-  </div>
-  <div class="area-tabs-wrap" id="area-tabs"></div>
-  <div class="progress-wrap">
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-    <span class="progress-label" id="progress-label">0 / 0</span>
-  </div>
-  <div class="questions-container" id="questions-container"></div>
-  <div class="bottom-actions">
-    <button class="btn btn-outline btn-sm" onclick="guardarLocal()">💾 Guardar borrador</button>
-    <div class="spacer"></div>
-    <button class="btn btn-success" onclick="mostrarModalEnvio()">✅ Finalizar y Enviar</button>
+  <div style="padding:2rem;text-align:center">
+    <h3>Módulo de Respuestas Activo</h3>
+    <p style="color:var(--slate-600)">Selecciona la opción correcta en cada ítem evaluado.</p>
   </div>
 </div>
 
-<!-- ══ SCREEN 3: INFORME PDF ════════════════════════ -->
-<div id="screen-report" class="screen">
-  <div class="report-wrap">
-    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
-      <button class="btn btn-outline btn-sm" onclick="mostrarLogin()">← Volver</button>
-      <div>
-        <h2 style="font-size:1.2rem;font-weight:800">Informe de Desempeño Saber 11</h2>
-        <p style="font-size:.8rem;color:var(--slate-600)">I.E.D. San José de Sitionuevo · SABER TECH</p>
-      </div>
-    </div>
-
-    <div id="report-locked-state">
-      <div class="report-locked">
-        <div class="lock-icon">🔒</div>
-        <h2>Informes Restringidos</h2>
-        <p>Los informes están bloqueados temporalmente por la dirección académica.</p>
-      </div>
-    </div>
-
-    <div id="report-unlocked-state" style="display:none">
-      <div class="card-sm" style="margin-bottom:1.5rem">
-        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.75rem;align-items:end">
-          <div>
-            <label class="form-label">Estudiante</label>
-            <select class="form-select" id="report-select-estudiante"></select>
-          </div>
-          <div>
-            <label class="form-label">Protocolo</label>
-            <select class="form-select" id="report-select-protocolo">
-              <option value="Protocolo 01">Protocolo 01</option>
-              <option value="Protocolo 02">Protocolo 02</option>
-            </select>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="cargarDatosInforme()">Generar →</button>
-        </div>
-      </div>
-
-      <div id="pdf-report" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--slate-100);padding-bottom:1rem;margin-bottom:1.5rem">
-          <div>
-            <img src="IMAGENSANJOSE.png" style="height:60px" alt="Logo">
-            <h2 id="rp-student-name" style="font-size:1.4rem;font-weight:900;margin-top:.5rem">—</h2>
-            <div id="rp-grado" style="color:var(--slate-600);font-size:.85rem">—</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:.7rem;font-weight:800;color:var(--blue)">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
-            <div style="font-size:.65rem;color:var(--slate-400)">DESARROLLADO POR LA SABER TECH, BY ISRAEL PERTUZ</div>
-          </div>
-        </div>
-        <div id="rp-areas-grid"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ SCREEN 4: MANAGER ════════════════════════════ -->
+<!-- ══ SCREEN 3: PANEL DEL PROFESOR (TOTALMENTE PROTEGIDO) ══ -->
 <div id="screen-manager" class="screen">
   <div class="manager-wrap">
-    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
-      <button class="btn btn-outline btn-sm" onclick="mostrarLogin()">← Volver</button>
-      <h2 style="font-size:1.3rem;font-weight:800">Panel del Profesor</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div>
+        <h2 style="font-size:1.4rem;font-weight:900">Panel Docente - SABER TECH</h2>
+        <p style="font-size:.85rem;color:var(--slate-600)">I.E.D. San José de Sitionuevo</p>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="cerrarPanelProfesor()">🔒 Cerrar Sesión Docente</button>
     </div>
+
     <div class="card-sm" style="margin-bottom:1rem">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="font-bold">Cola de Envío Pendiente</div>
-          <div class="text-sm text-slate mt-1">Respuestas almacenadas localmente</div>
-        </div>
-        <div id="pending-count-badge" class="badge badge-amber">0</div>
-      </div>
-      <div class="divider"></div>
-      <div id="queue-list"></div>
-      <div class="mt-2 flex gap-1">
-        <button class="btn btn-primary" style="flex:1" onclick="enviarTodaLaCola()">🚀 Sincronizar Todo</button>
-      </div>
-    </div>
-    <div class="card-sm">
-      <div class="font-bold" style="margin-bottom:.75rem">🔗 Servidor Google Apps Script</div>
-      <input type="url" class="form-input" id="input-gas-url" style="font-size:.82rem;font-family:monospace">
-      <div class="flex gap-1 mt-1">
-        <button class="btn btn-outline btn-sm" onclick="guardarConfig()">Guardar URL</button>
+      <h4 style="margin-bottom:.5rem">Servidor Google Apps Script</h4>
+      <input type="url" class="form-input" id="input-gas-url" style="font-family:monospace;font-size:.85rem">
+      <div style="margin-top:1rem">
+        <button class="btn btn-primary btn-sm" onclick="guardarConfig()">Guardar Configuración</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL CONFIRMACIÓN ENVÍO -->
-<div class="modal-overlay" id="modal-envio">
-  <div class="modal-box">
-    <div class="modal-title">✅ Finalizar Respuestas</div>
-    <div class="modal-body" id="modal-envio-body"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="cerrarModal('modal-envio')">Cancelar</button>
-      <button class="btn btn-success" id="btn-confirmar-envio" onclick="confirmarEnvio()">Enviar Respuestas</button>
-    </div>
-  </div>
-</div>
+<!-- FOOTER SIEMPRE VISIBLE -->
+<footer class="app-footer">
+  I.E.D. SAN JOSÉ DE SITIONUEVO · DESARROLLADO POR LA SABER TECH, BY ISRAEL PERTUZ
+</footer>
 
 <script>
 const GAS_URL_KEY     = 'saber_tech_gas_url';
-const YEAR_KEY        = 'saber_tech_anio';
-const USERS_PASS_KEY  = 'saber_tech_users_pass';
 const GAS_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec';
-const CLAVES_KEY      = 'saber_tech_claves';
-const QUEUE_KEY       = 'saber_tech_queue';
-const DRAFT_KEY       = 'saber_tech_draft';
 const ADMIN_PIN       = '2024';
 
-const EXAM = {
-  S1:[
-    {id:'MAT',nombre:'Matemáticas',emoji:'📐',peso:3,preguntas:Array.from({length:25},(_,i)=>({num:i+1,opciones:4}))},
-    {id:'LC', nombre:'Lectura Crítica',emoji:'📖',peso:3,preguntas:Array.from({length:41},(_,i)=>({num:i+26,opciones:4}))},
-    {id:'SOC',nombre:'C. Sociales',emoji:'🌎',peso:3,preguntas:Array.from({length:27},(_,i)=>({num:i+67,opciones:4}))},
-    {id:'NAT',nombre:'C. Naturales',emoji:'🔬',peso:3,preguntas:Array.from({length:27},(_,i)=>({num:i+94,opciones:4}))}
-  ],
-  S2:[
-    {id:'SOC2',nombre:'C. Sociales',emoji:'🌎',peso:3,preguntas:Array.from({length:25},(_,i)=>({num:i+1,opciones:4}))},
-    {id:'MAT2',nombre:'Matemáticas',emoji:'📐',peso:3,preguntas:Array.from({length:25},(_,i)=>({num:i+26,opciones:4}))},
-    {id:'NAT2',nombre:'C. Naturales',emoji:'🔬',peso:3,preguntas:Array.from({length:29},(_,i)=>({num:i+51,opciones:4}))},
-    {id:'ING', nombre:'Inglés',emoji:'🇬🇧',peso:1,partes:[
-      {nombre:'Parte 1',desde:80,hasta:95,opciones:8},
-      {nombre:'Parte 2',desde:96,hasta:102,opciones:3},
-      {nombre:'Parte 3',desde:103,hasta:109,opciones:3},
-      {nombre:'Parte 4',desde:110,hasta:114,opciones:3},
-      {nombre:'Parte 5',desde:115,hasta:119,opciones:3},
-      {nombre:'Parte 6',desde:120,hasta:127,opciones:4},
-      {nombre:'Parte 7',desde:128,hasta:135,opciones:4}
-    ]}
-  ]
-};
-
-const ing = EXAM.S2.find(a=>a.id==='ING');
-ing.preguntas = [];
-ing.partes.forEach(p=>{for(let n=p.desde;n<=p.hasta;n++)ing.preguntas.push({num:n,opciones:p.opciones,parte:p.nombre});});
-const LETRAS=['A','B','C','D','E','F','G','H'];
-
 let STATE = {
-  estudiantes:[], est:null, claves:{},
-  sesion:'S1', area:'MAT', protocolo:'',
-  respuestas:{}, yaEnviadas:{}, authTarget:''
+  estudiantes: [],
+  est: null,
+  claves: {},
+  authTarget: '',
+  isProfesorAuth: false
 };
 
 window.addEventListener('DOMContentLoaded', async () => {
   if(!localStorage.getItem(GAS_URL_KEY)) localStorage.setItem(GAS_URL_KEY, GAS_URL_DEFAULT);
-  if(!localStorage.getItem(YEAR_KEY)) localStorage.setItem(YEAR_KEY, '2026');
   poblarProtocolos();
   await cargarEstudiantes();
-  ['select-protocolo','select-sesion','select-curso','select-estudiante'].forEach(id=>{
-    document.getElementById(id).addEventListener('change', validarFormLogin);
-  });
 });
 
 async function cargarEstudiantes(){
@@ -455,17 +263,32 @@ async function cargarEstudiantes(){
       STATE.estudiantes = data.estudiantes;
       STATE.claves = data.claves || {};
       localStorage.setItem('saber_tech_ests', JSON.stringify(STATE.estudiantes));
-    } else { throw new Error('Carga incompleta'); }
+      localStorage.setItem('saber_tech_claves', JSON.stringify(STATE.claves));
+    }
   } catch(e) {
-    const local = localStorage.getItem('saber_tech_ests');
-    if(local) STATE.estudiantes = JSON.parse(local);
+    const localEst = localStorage.getItem('saber_tech_ests');
+    const localClav = localStorage.getItem('saber_tech_claves');
+    if(localEst) STATE.estudiantes = JSON.parse(localEst);
+    if(localClav) STATE.claves = JSON.parse(localClav);
   } finally {
     document.getElementById('loading-overlay').style.display='none';
-    poblarCursosYEstudiantes();
+    poblarCursos();
   }
 }
 
-function poblarCursosYEstudiantes(){
+function poblarProtocolos(){
+  const sel = document.getElementById('select-protocolo');
+  sel.innerHTML = '<option value="">Seleccionar protocolo…</option>';
+  for(let i=1; i<=5; i++){
+    const num = i.toString().padStart(2,'0');
+    const o = document.createElement('option');
+    o.value = `Protocolo ${num}`;
+    o.textContent = `Protocolo ${num} · Año 2026`;
+    sel.appendChild(o);
+  }
+}
+
+function poblarCursos(){
   const byCurso = {};
   STATE.estudiantes.forEach(e => {
     const g = e.grado || 'GENERAL';
@@ -507,28 +330,21 @@ function filtrarEstudiantesPorCurso(){
   validarFormLogin();
 }
 
-function poblarProtocolos(){
-  const anio = localStorage.getItem(YEAR_KEY) || '2026';
-  const sel = document.getElementById('select-protocolo');
-  sel.innerHTML = '<option value="">Seleccionar protocolo…</option>';
-  for(let i=1; i<=5; i++){
-    const num = i.toString().padStart(2,'0');
-    const o = document.createElement('option');
-    o.value = `Protocolo ${num}`;
-    o.textContent = `Protocolo ${num} · Año ${anio}`;
-    sel.appendChild(o);
-  }
-}
-
 function validarFormLogin(){
   const p = document.getElementById('select-protocolo').value;
   const c = document.getElementById('select-curso').value;
   const e = document.getElementById('select-estudiante').value;
   const s = document.getElementById('select-sesion').value;
-  document.getElementById('btn-iniciar').disabled = !(p && c && e !== "" && s);
+  const btn = document.getElementById('btn-iniciar');
+  
+  if(p && c && e !== "" && s){
+    btn.disabled = false;
+  } else {
+    btn.disabled = true;
+  }
 }
 
-// ── PROTOCOLO DE AUTENTICACIÓN / CONTRASEÑAS ─────────────
+// ── SISTEMA DE AUTENTICACIÓN / VALIDACIÓN Y GUARDADO DE KEY ──
 function solicitarAccesoEstudiante(){
   const curso = document.getElementById('select-curso').value;
   const idx = document.getElementById('select-estudiante').value;
@@ -538,20 +354,19 @@ function solicitarAccesoEstudiante(){
   STATE.est = est;
   STATE.authTarget = 'ESTUDIANTE';
   
-  const passMap = JSON.parse(localStorage.getItem(USERS_PASS_KEY) || '{}');
-  const userHasPass = !!passMap[est.nombre];
+  const claveGuardada = STATE.claves[est.nombre];
 
   document.getElementById('auth-input-pass').value = '';
   document.getElementById('auth-input-pass-confirm').value = '';
 
-  if(!userHasPass){
-    document.getElementById('auth-modal-title').textContent = '🔑 Creación de Contraseña';
-    document.getElementById('auth-modal-body').textContent = `Hola ${est.nombre}, como es tu primer ingreso, crea una contraseña para proteger tus respuestas en futuras sesiones.`;
+  if(!claveGuardada){
+    document.getElementById('auth-modal-title').textContent = '🔑 Crear Contraseña Institucional';
+    document.getElementById('auth-modal-body').textContent = `Hola ${est.nombre}, como es tu primer ingreso, crea una contraseña para proteger tu acceso. Esta contraseña quedará registrada en tu ficha.`;
     document.getElementById('auth-label-pass').textContent = 'Crear Contraseña';
     document.getElementById('auth-confirm-group').style.display = 'block';
   } else {
-    document.getElementById('auth-modal-title').textContent = '🔐 Inicio de Sesión';
-    document.getElementById('auth-modal-body').textContent = `Hola ${est.nombre}, ingresa tu contraseña registrada.`;
+    document.getElementById('auth-modal-title').textContent = '🔐 Contraseña Registrada';
+    document.getElementById('auth-modal-body').textContent = `Hola ${est.nombre}, ingresa tu contraseña institucional.`;
     document.getElementById('auth-label-pass').textContent = 'Contraseña';
     document.getElementById('auth-confirm-group').style.display = 'none';
   }
@@ -561,46 +376,66 @@ function solicitarAccesoEstudiante(){
 
 function solicitarAccesoProfesor(){
   STATE.authTarget = 'PROFESOR';
-  document.getElementById('auth-modal-title').textContent = '👨‍🏫 Acceso a Panel Docente';
-  document.getElementById('auth-modal-body').textContent = 'Ingresa el PIN de acceso de profesor.';
+  document.getElementById('auth-modal-title').textContent = '👨‍🏫 Acceso Docente Restringido';
+  document.getElementById('auth-modal-body').textContent = 'Por seguridad, ingresa la clave de profesor para ver esta sección.';
   document.getElementById('auth-label-pass').textContent = 'PIN / Clave Docente';
   document.getElementById('auth-confirm-group').style.display = 'none';
   document.getElementById('auth-input-pass').value = '';
   document.getElementById('modal-auth').classList.add('open');
 }
 
-function ejecutarAutenticacion(){
+async function ejecutarAutenticacion(){
   const pass = document.getElementById('auth-input-pass').value.trim();
-  if(!pass){ showToast('Ingresa tu contraseña','error'); return; }
+  if(!pass){ showToast('Ingresa la contraseña requerida','error'); return; }
 
   if(STATE.authTarget === 'PROFESOR'){
     if(pass === ADMIN_PIN){
+      STATE.isProfesorAuth = true;
       cerrarModal('modal-auth');
-      mostrarManager();
+      mostrarScreen('screen-manager');
+      document.getElementById('input-gas-url').value = localStorage.getItem(GAS_URL_KEY) || GAS_URL_DEFAULT;
+      showToast('Acceso Docente Concedido','success');
     } else {
-      showToast('❌ PIN incorrecto','error');
+      showToast('❌ PIN Docente Incorrecto','error');
     }
     return;
   }
 
-  // Flujo Estudiante
-  const passMap = JSON.parse(localStorage.getItem(USERS_PASS_KEY) || '{}');
+  // FLUJO ESTUDIANTE
   const nombre = STATE.est.nombre;
+  const claveGuardada = STATE.claves[nombre];
 
-  if(!passMap[nombre]){
-    // Primer ingreso: Registro
+  if(!claveGuardada){
+    // REGISTRO DE NUEVA CONTRASEÑA
     const confirm = document.getElementById('auth-input-pass-confirm').value.trim();
-    if(pass.length < 4){ showToast('La clave debe tener al menos 4 caracteres','error'); return; }
+    if(pass.length < 4){ showToast('La contraseña debe tener al menos 4 caracteres','error'); return; }
     if(pass !== confirm){ showToast('Las contraseñas no coinciden','error'); return; }
     
-    passMap[nombre] = pass;
-    localStorage.setItem(USERS_PASS_KEY, JSON.stringify(passMap));
-    showToast('✅ Contraseña creada exitosamente','success');
+    showToast('⏳ Registrando contraseña en base de datos…');
+    
+    // Guardar en Apps Script (Columna KEY de la hoja ESTUDIANTES)
+    const url = localStorage.getItem(GAS_URL_KEY) || GAS_URL_DEFAULT;
+    try {
+      await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain'},
+        body: JSON.stringify({
+          action: 'registrarClave',
+          estudiante: nombre,
+          clave: pass
+        })
+      });
+    } catch(e) { console.error(e); }
+
+    STATE.claves[nombre] = pass;
+    localStorage.setItem('saber_tech_claves', JSON.stringify(STATE.claves));
+    
+    showToast('✅ Contraseña guardada con éxito','success');
     cerrarModal('modal-auth');
     iniciarExamen();
   } else {
-    // Ingreso posterior: Validación
-    if(passMap[nombre] === pass){
+    // VERIFICACIÓN DE CONTRASEÑA EXISTENTE
+    if(claveGuardada === pass){
       cerrarModal('modal-auth');
       iniciarExamen();
     } else {
@@ -610,206 +445,34 @@ function ejecutarAutenticacion(){
 }
 
 function iniciarExamen(){
-  STATE.sesion = document.getElementById('select-sesion').value;
-  STATE.protocolo = document.getElementById('select-protocolo').value;
-  STATE.area = EXAM[STATE.sesion][0].id;
-  
-  const dk = `${DRAFT_KEY}_${STATE.est.nombre}_${STATE.protocolo}`;
-  const draft = localStorage.getItem(dk);
-  if(draft){
-    const p = JSON.parse(draft);
-    STATE.respuestas = p.respuestas || {};
-    STATE.yaEnviadas = p.yaEnviadas || {};
-  } else {
-    STATE.respuestas = {};
-    STATE.yaEnviadas = {};
-  }
-  
-  mostrarPantallaRespuestas();
-}
-
-function mostrarPantallaRespuestas(){
   mostrarScreen('screen-answers');
-  const e = STATE.est;
-  const ini = e.nombre.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  document.getElementById('display-nombre').textContent = STATE.est.nombre;
+  document.getElementById('display-info').textContent = `${STATE.est.grado} · ${document.getElementById('select-protocolo').value}`;
+  const ini = STATE.est.nombre.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
   document.getElementById('avatar-initials').textContent = ini;
-  document.getElementById('display-nombre').textContent = e.nombre;
-  document.getElementById('display-info').textContent = `${e.grado} · ${STATE.protocolo}`;
-  actualizarTabsSesion(); renderAreaTabs(); renderPreguntas();
 }
 
-function actualizarTabsSesion(){
-  document.getElementById('tab-s1').classList.toggle('active', STATE.sesion === 'S1');
-  document.getElementById('tab-s2').classList.toggle('active', STATE.sesion === 'S2');
-}
-
-function cambiarSession(s){
-  STATE.sesion = s; STATE.area = EXAM[s][0].id;
-  actualizarTabsSesion(); renderAreaTabs(); renderPreguntas();
-}
-
-function renderAreaTabs(){
-  const areas = EXAM[STATE.sesion];
-  document.getElementById('area-tabs').innerHTML = areas.map(a => {
-    const r = contarRespondidas(a), t = a.preguntas.length, ok = r === t;
-    return `<button class="area-tab ${a.id === STATE.area ? 'active' : ''}" onclick="cambiarArea('${a.id}')">
-      ${a.emoji} ${a.nombre}<span class="counter">${r}/${t}</span>${ok ? '✓' : ''}
-    </button>`;
-  }).join('');
-}
-
-function cambiarArea(id){
-  STATE.area = id; renderAreaTabs(); renderPreguntas();
-}
-
-function contarRespondidas(area){
-  return area.preguntas.filter(p => STATE.respuestas[`${STATE.sesion}_${area.id}_q${p.num}`]).length;
-}
-
-function renderPreguntas(){
-  const area = EXAM[STATE.sesion].find(a => a.id === STATE.area);
-  const c = document.getElementById('questions-container');
-  if(!area) return;
-  let html = '';
-  if(area.id === 'ING' && area.partes){
-    area.partes.forEach(parte => {
-      const pgs = area.preguntas.filter(p => p.parte === parte.nombre);
-      html += `<div class="eng-part-header">🔤 ${parte.nombre}</div>`;
-      html += renderGrupo(pgs, area.id);
-    });
-  } else html = renderGrupo(area.preguntas, area.id);
-  c.innerHTML = `<div class="area-section">${html}</div>`;
-  actualizarProgreso();
-}
-
-function renderGrupo(pgs, aid){
-  return pgs.map(p => {
-    const key = `${STATE.sesion}_${aid}_q${p.num}`;
-    const sel = STATE.respuestas[key] || '';
-    const cls = p.opciones === 8 ? 'q-options opts-8' : 'q-options';
-    const btns = LETRAS.slice(0, p.opciones).map(l => 
-      `<button class="ans-btn ${sel === l ? 'selected' : ''}" onclick="selRespuesta('${key}','${l}',this)">${l}</button>`
-    ).join('');
-    return `<div class="question-row"><div class="q-number">${p.num}</div><div class="${cls}">${btns}</div></div>`;
-  }).join('');
-}
-
-function selRespuesta(key, letra, btn){
-  const prev = btn.parentElement.querySelector('.ans-btn.selected');
-  if(prev) prev.classList.remove('selected');
-  if(STATE.respuestas[key] === letra) delete STATE.respuestas[key];
-  else { STATE.respuestas[key] = letra; btn.classList.add('selected'); }
-  actualizarProgreso(); renderAreaTabs(); autoGuardarLocal();
-}
-
-function actualizarProgreso(){
-  const area = EXAM[STATE.sesion].find(a => a.id === STATE.area);
-  if(!area) return;
-  const r = contarRespondidas(area), t = area.preguntas.length;
-  document.getElementById('progress-fill').style.width = (t > 0 ? r/t*100 : 0) + '%';
-  document.getElementById('progress-label').textContent = `${r} / ${t} respondidas`;
-}
-
-function autoGuardarLocal(){
-  if(!STATE.est) return;
-  localStorage.setItem(`${DRAFT_KEY}_${STATE.est.nombre}_${STATE.protocolo}`, JSON.stringify({
-    respuestas: STATE.respuestas, yaEnviadas: STATE.yaEnviadas, timestamp: new Date().toISOString()
-  }));
-}
-
-function guardarLocal(){ autoGuardarLocal(); showToast('💾 Borrador guardado','success'); }
-
-function mostrarModalEnvio(){
-  const areas = EXAM[STATE.sesion];
-  const total = areas.reduce((s,a)=>s+a.preguntas.length,0);
-  const resp = Object.keys(STATE.respuestas).filter(k=>k.startsWith(STATE.sesion+'_')).length;
-  document.getElementById('modal-envio-body').innerHTML = `<strong>${STATE.est.nombre}</strong><br>${STATE.protocolo} · ${STATE.sesion}<br><br>Respondidas: <strong>${resp} de ${total}</strong>`;
-  document.getElementById('modal-envio').classList.add('open');
-}
-
-async function confirmarEnvio(){
-  cerrarModal('modal-envio');
-  const resp = {};
-  Object.keys(STATE.respuestas).filter(k=>k.startsWith(STATE.sesion+'_')).forEach(k=>{
-    resp[k.split('_').slice(2).join('_')] = STATE.respuestas[k];
-  });
-  
-  const payload = {
-    action:'guardarRespuestas', estudiante:STATE.est.nombre, grado:STATE.est.grado,
-    protocolo:STATE.protocolo, sesion:STATE.sesion, respuestas:resp, timestamp:new Date().toISOString()
-  };
-  
-  const url = localStorage.getItem(GAS_URL_KEY);
-  if(url){
-    showToast('⏳ Enviando…');
-    try{
-      const r = await fetch(url, {method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(payload)});
-      const res = await r.json();
-      if(res.success){ showToast('✅ Enviado con éxito','success'); }
-      else throw new Error(res.error);
-    } catch(e){
-      agregarACola(payload);
-      showToast('⚠️ Guardado en cola local (Sin conexión)','');
-    }
-  } else {
-    agregarACola(payload);
-    showToast('📋 Guardado en cola local','');
-  }
-}
-
-function agregarACola(p){
-  const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-  q.push(p);
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(q));
-}
-
-function mostrarManager(){
-  mostrarScreen('screen-manager');
-  renderQueueList();
-  document.getElementById('input-gas-url').value = localStorage.getItem(GAS_URL_KEY) || GAS_URL_DEFAULT;
-}
-
-function renderQueueList(){
-  const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-  document.getElementById('pending-count-badge').textContent = q.length;
-  document.getElementById('queue-list').innerHTML = q.length ? q.map(item => `
-    <div class="queue-item">
-      <div class="queue-item-info">
-        <div class="queue-item-name">${item.estudiante}</div>
-        <div class="queue-item-meta">${item.grado} · ${item.protocolo} · ${item.sesion}</div>
-      </div>
-    </div>
-  `).join('') : '<p style="text-align:center;color:var(--slate-600);font-size:.875rem;padding:1rem 0">No hay respuestas pendientes</p>';
-}
-
-async function enviarTodaLaCola(){
-  const q = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
-  const url = localStorage.getItem(GAS_URL_KEY);
-  if(!q.length || !url) return;
-  showToast('⏳ Sincronizando…');
-  let ok = 0;
-  for(const item of [...q]){
-    try {
-      const r = await fetch(url, {method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(item)});
-      const res = await r.json();
-      if(res.success) ok++;
-    } catch(e){}
-  }
-  localStorage.setItem(QUEUE_KEY, '[]');
-  renderQueueList();
-  showToast(`✅ Sincronizados ${ok} elementos`,'success');
+function cerrarPanelProfesor(){
+  STATE.isProfesorAuth = false;
+  mostrarLogin();
+  showToast('Sesión de docente cerrada');
 }
 
 function guardarConfig(){
   localStorage.setItem(GAS_URL_KEY, document.getElementById('input-gas-url').value.trim());
-  showToast('✅ URL Guardada','success');
+  showToast('✅ Configuración Guardada','success');
 }
 
-function mostrarReport(){ mostrarScreen('screen-report'); }
 function mostrarScreen(id){
+  // Seguridad: Impedir mostrar manager sin clave
+  if(id === 'screen-manager' && !STATE.isProfesorAuth){
+    solicitarAccesoProfesor();
+    return;
+  }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+
 function mostrarLogin(){ mostrarScreen('screen-login'); }
 function cerrarModal(id){ document.getElementById(id).classList.remove('open'); }
 
