@@ -20,7 +20,6 @@
   --radius: 1rem;
 }
 
-/* ANTI-COPY & NO-SELECT PROTECTION */
 *, *::before, *::after { 
   box-sizing: border-box; 
   margin: 0; 
@@ -33,18 +32,15 @@
 
 body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-/* TOPBAR */
 .topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; }
 .topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
-.topbar-brand img { height: 40px; width: auto; }
+.topbar-brand img { height: 40px; width: auto; object-fit: contain; }
 .topbar-title { font-size: 1rem; font-weight: 900; color: var(--slate-900); }
 .topbar-subtitle { font-size: 0.7rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
 
-/* SCREENS */
 .screen { display: none; flex: 1; height: calc(100vh - 60px); }
 .screen.active { display: flex; }
 
-/* LOGIN DESIGN */
 #screen-login { display: none; align-items: center; justify-content: center; padding: 2rem 1rem; background: radial-gradient(circle at top, #eff6ff 0%, #f8fafc 100%); width: 100%; }
 #screen-login.active { display: flex; }
 .login-container { width: 100%; max-width: 480px; }
@@ -59,9 +55,7 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; }
 .btn-outline { background: white; color: var(--slate-600); border: 1.5px solid var(--slate-300); }
 .btn-danger { background: var(--red); color: white; }
-.btn-ghost { background: transparent; color: var(--slate-600); font-size: 0.8rem; }
 
-/* SPLIT-SCREEN EXAM UI (80% / 20%) */
 #screen-answers { display: none; width: 100%; height: calc(100vh - 60px); flex-direction: row; }
 #screen-answers.active { display: flex; }
 
@@ -78,19 +72,16 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 
 .answers-list { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
 
-/* 1 QUESTION PER ROW DESIGN */
 .q-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 0.4rem 0.6rem; border-radius: 0.5rem; border: 1px solid var(--slate-300); }
 .q-num { font-size: 0.8rem; font-weight: 800; color: var(--slate-800); width: 45px; }
 .q-opts { display: flex; gap: 0.3rem; flex: 1; justify-content: flex-end; }
 .opt-bubble { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--slate-300); background: white; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .opt-bubble.selected { background: var(--primary); color: white; border-color: var(--primary); }
 
-/* MODALS */
 .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
 .modal-overlay.open { display: flex; }
 .modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 440px; width: 100%; box-shadow: var(--shadow-lg); }
 
-/* TOAST */
 #toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--slate-900); color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 700; z-index: 300; transition: transform 0.25s ease; }
 #toast.show { transform: translateX(-50%) translateY(0); }
 #toast.error { background: var(--red); }
@@ -107,19 +98,16 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 
 <div id="toast"></div>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-brand">
-    <img src="IMAGENSANJOSE.png" alt="Logo">
+    <img src="IMAGENSANJOSE.png" alt="Logo" onerror="this.style.display='none'">
     <div>
       <div class="topbar-title">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
       <div class="topbar-subtitle">Plataforma Digital Saber 11</div>
     </div>
   </div>
-  <button class="btn btn-outline" style="width:auto; padding:0.4rem 0.8rem; font-size:0.8rem;" id="btn-top-exit" onclick="mostrarLogin()" style="display:none">Salir</button>
 </div>
 
-<!-- SCREEN 1: LOGIN -->
 <div id="screen-login" class="screen active">
   <div class="login-container">
     <div class="card">
@@ -159,7 +147,6 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
   </div>
 </div>
 
-<!-- MODAL AUTH -->
 <div class="modal-overlay" id="modal-auth">
   <div class="modal-box">
     <h3 style="margin-bottom:0.5rem;font-weight:900;" id="auth-modal-title">🔐 Autenticación</h3>
@@ -182,14 +169,11 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
   </div>
 </div>
 
-<!-- SCREEN 2: SPLIT EXAM (80% PDF / 20% ANSWERS) -->
 <div id="screen-answers" class="screen">
-  <!-- LEFT: 80% PDF VIEWER -->
   <div class="pdf-pane">
-    <iframe id="pdf-frame" src="about:blank#toolbar=0&navpanes=0&scrollbar=0"></iframe>
+    <iframe id="pdf-frame" src="about:blank"></iframe>
   </div>
 
-  <!-- RIGHT: 20% ANSWER SHEET -->
   <div class="answers-pane">
     <div class="exam-info-bar">
       <div style="font-weight:800;font-size:0.85rem;" id="display-nombre">Estudiante</div>
@@ -208,7 +192,6 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
   </div>
 </div>
 
-<!-- FINAL REPORT MODAL -->
 <div class="modal-overlay" id="modal-report">
   <div class="modal-box">
     <h3 style="margin-bottom:0.5rem;font-weight:900;">📋 Resumen de Entrega</h3>
@@ -219,7 +202,12 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec';
-const PDF_URL = 'PRUEBA_SABER_11.pdf'; // Ruta a tu archivo PDF o URL de Google Drive embed
+
+// Mapeo dinámico según la sesión seleccionada
+const PDF_FILES = {
+  S1: '2026 2 SESIÓN 1_compressed.pdf',
+  S2: '2026 2 SESIÓN 2_compressed.pdf'
+};
 
 const ESTRUCTURA_SESIONES = {
   S1: [
@@ -352,17 +340,23 @@ async function ejecutarAutenticacion(){
     showToast('Guardando contraseña...');
     
     try {
-      await fetch(GAS_URL, {
+      const resp = await fetch(GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'registrarClave', estudiante: nombre, clave: pass })
       });
-      STATE.claves[nombre] = pass;
-      showToast('Clave guardada', 'success');
-      cerrarModal('modal-auth');
-      iniciarExamen();
+      const data = await resp.json();
+      
+      if(data.success) {
+        STATE.claves[nombre] = pass;
+        showToast('Clave registrada en hoja ESTUDIANTES', 'success');
+        cerrarModal('modal-auth');
+        iniciarExamen();
+      } else {
+        showToast(data.error || 'Error al registrar clave', 'error');
+      }
     } catch(e) {
-      showToast('Error al guardar clave', 'error');
+      showToast('Error de conexión al servidor', 'error');
     }
   } else {
     if(claveGuardada === pass){
@@ -381,8 +375,11 @@ function iniciarExamen(){
   
   const sesion = document.getElementById('select-sesion').value;
   document.getElementById('display-nombre').textContent = STATE.est.nombre;
-  document.getElementById('display-info').textContent = `${STATE.est.grado} · ${sesion}`;
-  document.getElementById('pdf-frame').src = `${PDF_URL}#toolbar=0&navpanes=0`;
+  document.getElementById('display-info').textContent = `${STATE.est.grado} · ${sesion === 'S1' ? 'Sesión 1' : 'Sesión 2'}`;
+  
+  // Selección dinámica del archivo PDF según la sesión elegida
+  const pdfRuta = PDF_FILES[sesion] || '2026 2 SESIÓN 1_compressed.pdf';
+  document.getElementById('pdf-frame').src = `${encodeURIComponent(pdfRuta)}#toolbar=0&navpanes=0`;
 
   renderizarAreas(sesion);
 }
@@ -428,7 +425,6 @@ function cargarPreguntasArea(itemArea){
   }
 }
 
-/* SAVE ANSWER DIRECTLY TO GOOGLE SHEETS */
 async function marcarYGuardarRespuesta(qKey, opcion, el){
   STATE.respuestas[qKey] = opcion;
   const parent = el.parentElement;
@@ -457,18 +453,15 @@ async function marcarYGuardarRespuesta(qKey, opcion, el){
   }
 }
 
-/* ANTI-CHEATING PROTECTION */
 function initAntiCheating(){
-  // Detect tab/window change
   window.addEventListener('blur', registrarInfraccion);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) registrarInfraccion();
   });
 
-  // Block print screen & shortcuts
   window.addEventListener('keydown', (e) => {
     if (e.key === 'PrintScreen' || 
-       (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.shiftKey && e.key === 'I'))) {
+       (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || (e.shiftKey && e.key === 'I')))) {
       e.preventDefault();
       showToast('🚫 Acción bloqueada por seguridad', 'error');
     }
@@ -483,9 +476,8 @@ function registrarInfraccion(){
   badge.textContent = `⚠️ Cambios de ventana: ${STATE.warnings}`;
   document.getElementById('warning-container').style.display = 'block';
 
-  showToast(`⚠️ Alerta: Has salido de la prueba (${STATE.warnings}). Se notificará al docente.`, 'error');
+  showToast(`⚠️ Alerta: Saliste de la prueba (${STATE.warnings}). Se guardará en el informe.`, 'error');
 
-  // Log violation to backend
   try {
     fetch(GAS_URL, {
       method: 'POST',
@@ -506,9 +498,9 @@ function finalizarExamen(){
   const html = `
     <p><strong>Estudiante:</strong> ${STATE.est.nombre}</p>
     <p><strong>Grado:</strong> ${STATE.est.grado}</p>
-    <p><strong>Preguntas respondidas:</strong> ${respondidas}</p>
+    <p><strong>Respuestas marcadas:</strong> ${respondidas}</p>
     <p style="color:${STATE.warnings > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:800; margin-top:0.5rem;">
-      <strong>Infracciones registradas (cambio de ventana):</strong> ${STATE.warnings}
+      <strong>Infracciones por ventana:</strong> ${STATE.warnings}
     </p>
   `;
 
