@@ -19,8 +19,20 @@
   --radius: 0.75rem;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+  user-select: none !important; 
+  -webkit-user-select: none !important;
+}
+
 body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Anti-PrintScreen CSS Filter */
+@media print {
+  body { display: none !important; }
+}
 
 /* Topbar */
 .topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; }
@@ -52,16 +64,15 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 #screen-welcome { align-items: center; justify-content: center; background: var(--bg-main); padding: 2rem; }
 .welcome-card { background: white; border-radius: var(--radius); padding: 2.5rem; max-width: 650px; width: 100%; box-shadow: var(--shadow-lg); }
 
-/* Exam Screen (88% PDF / 12% Answers) */
+/* Exam Screen */
 #screen-answers { width: 100%; height: calc(100vh - 60px); flex-direction: row; }
 .pdf-pane { width: 88%; height: 100%; background: #525659; }
 .pdf-pane iframe { width: 100%; height: 100%; border: none; }
 
-.answers-pane { width: 12%; min-width: 210px; height: 100%; background: white; display: flex; flex-direction: column; border-left: 1px solid var(--slate-300); }
+.answers-pane { width: 12%; min-width: 220px; height: 100%; background: white; display: flex; flex-direction: column; border-left: 1px solid var(--slate-300); }
 .exam-info-bar { padding: 0.4rem; background: var(--slate-900); color: white; text-align: center; }
 .timer-badge { background: #334155; color: #38bdf8; font-weight: 900; font-size: 0.75rem; padding: 0.2rem 0.4rem; border-radius: 0.25rem; margin-top: 0.2rem; display: inline-block; }
 
-/* Tabs y Respuestas en una sola línea */
 .area-tabs-vertical { display: flex; flex-direction: column; padding: 0.3rem; background: #f1f5f9; gap: 0.2rem; border-bottom: 1px solid var(--slate-300); }
 .tab-btn { padding: 0.3rem; border-radius: 0.3rem; font-size: 0.6rem; font-weight: 800; border: 1px solid var(--slate-300); background: white; cursor: pointer; text-align: center; }
 .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -71,16 +82,43 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 /* Fila Horizontal por Pregunta */
 .q-row-line { display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 0.25rem 0.4rem; border-radius: 0.3rem; border: 1px solid var(--slate-300); }
 .q-num-inline { font-size: 0.65rem; font-weight: 900; min-width: 28px; }
-.q-opts-inline { display: flex; gap: 0.2rem; align-items: center; }
-.opt-bubble { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--slate-300); background: white; font-size: 0.55rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.q-opts-inline { display: flex; gap: 0.15rem; align-items: center; flex-wrap: wrap; }
+.opt-bubble { width: 19px; height: 19px; border-radius: 50%; border: 1px solid var(--slate-300); background: white; font-size: 0.55rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .opt-bubble.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* Warning Modal Center (3 Seconds) */
+#center-warning-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(5px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+#center-warning-modal.active { display: flex; animation: popup 0.2s ease-out; }
+.warning-card {
+  background: white;
+  border-top: 6px solid var(--red);
+  border-radius: var(--radius);
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes popup {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
 
 /* Modals */
 .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
 .modal-overlay.open { display: flex; }
-.modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
 
-/* Tabs dentro del panel docente */
 .teacher-tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid var(--slate-300); margin-bottom: 1rem; }
 .t-tab { padding: 0.5rem 1rem; font-weight: 800; font-size: 0.8rem; cursor: pointer; border-bottom: 3px solid transparent; }
 .t-tab.active { border-color: var(--primary); color: var(--primary); }
@@ -94,12 +132,27 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 0.5rem; }
 th, td { border: 1px solid var(--slate-300); padding: 0.4rem; text-align: left; }
 th { background: #f1f5f9; font-weight: 800; }
+
+.ingles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.5rem; max-height: 300px; overflow-y: auto; padding: 0.5rem; background: #f8fafc; border: 1px solid var(--slate-300); border-radius: 0.5rem; }
+.ingles-item { background: white; padding: 0.4rem; border-radius: 0.3rem; border: 1px solid var(--slate-300); display: flex; flex-direction: column; gap: 0.2rem; }
 </style>
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="triggerWarning('Acción no permitida: Clic derecho bloqueado'); return false;">
 
 <div class="loading-overlay" id="loading-overlay">
   <p>Cargando Plataforma SABER TECH…</p>
+</div>
+
+<!-- ALERTA CENTRAL DE 3 SEGUNDOS -->
+<div id="center-warning-modal">
+  <div class="warning-card">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚠️</div>
+    <h3 style="font-weight: 900; color: var(--red); margin-bottom: 0.5rem;">¡ACCIÓN NO PERMITIDA!</h3>
+    <p id="warning-msg-text" style="font-size: 0.85rem; font-weight: 700; color: var(--slate-800);"></p>
+    <div style="margin-top: 1rem; font-size: 0.7rem; color: var(--slate-600); font-weight: 800;">
+      Esta infracción ha sido registrada en el sistema.
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -164,7 +217,7 @@ th { background: #f1f5f9; font-weight: 800; }
     <div style="font-size:0.85rem; color:var(--slate-700); line-height:1.5; margin-bottom:1.5rem;">
       <p>📌 <strong>Estructura de la prueba:</strong></p>
       <ul id="welcome-area-list" style="margin-left:1.2rem; margin-top:0.3rem;"></ul>
-      <p style="margin-top:0.8rem; color:var(--red);">⚠️ <strong>Control estricto:</strong> No salgas de la pantalla ni cambies de pestaña. Se registrarán las infracciones.</p>
+      <p style="margin-top:0.8rem; color:var(--red);">⚠️ <strong>Control de seguridad:</strong> Copiar, pegar, capturar pantalla o cambiar de pestaña generará bloqueos e infracciones directas.</p>
     </div>
 
     <button class="btn btn-primary" onclick="iniciarExamenAhora()">Comenzar Prueba Ahora</button>
@@ -233,7 +286,7 @@ th { background: #f1f5f9; font-weight: 800; }
       <div class="teacher-tabs">
         <div class="t-tab active" onclick="switchTeacherTab('tab-general', this)">General & Tiempos</div>
         <div class="t-tab" onclick="switchTeacherTab('tab-preguntas', this)">Preguntas & Áreas</div>
-        <div class="t-tab" onclick="switchTeacherTab('tab-ingles', this)">Opciones Inglés</div>
+        <div class="t-tab" onclick="switchTeacherTab('tab-ingles', this); renderizarConfiguracionIngles();">Formatos Inglés</div>
         <div class="t-tab" onclick="switchTeacherTab('tab-reportes', this); cargarReportesDocente();">Informes & Infracciones</div>
       </div>
 
@@ -260,17 +313,6 @@ th { background: #f1f5f9; font-weight: 800; }
             <input type="number" class="form-input" id="cfg-minutos" value="30" min="0" max="59">
           </div>
         </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
-          <div class="form-group">
-            <label class="form-label">Fecha/Hora Liberación Prueba</label>
-            <input type="datetime-local" class="form-input" id="cfg-fecha-inicio">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha/Hora Cierre de Prueba</label>
-            <input type="datetime-local" class="form-input" id="cfg-fecha-fin">
-          </div>
-        </div>
       </div>
 
       <!-- TAB 2: PREGUNTAS POR ÁREA -->
@@ -288,38 +330,40 @@ th { background: #f1f5f9; font-weight: 800; }
           <div><label class="form-label">Sociales 2</label><input type="number" class="form-input" id="cfg-s2-soc" value="25"></div>
           <div><label class="form-label">Matemáticas 2</label><input type="number" class="form-input" id="cfg-s2-mat" value="25"></div>
           <div><label class="form-label">Ciencias 2</label><input type="number" class="form-input" id="cfg-s2-cn" value="29"></div>
-          <div><label class="form-label">Inglés</label><input type="number" class="form-input" id="cfg-s2-ing" value="55"></div>
+          <div><label class="form-label">Inglés</label><input type="number" class="form-input" id="cfg-s2-ing" value="55" onchange="renderizarConfiguracionIngles()"></div>
         </div>
       </div>
 
-      <!-- TAB 3: INGLÉS CONFIGURACIÓN DE OPCOINES -->
+      <!-- TAB 3: INGLÉS CONFIGURACIÓN INDIVIDUAL DE PREGUNTAS -->
       <div id="tab-ingles" class="t-content" style="display:none;">
-        <p style="font-size:0.8rem; color:var(--slate-600); margin-bottom:0.8rem;">
-          Configura las opciones de respuesta disponibles para la prueba de Inglés (A,B,C o A,B,C,D,E):
-        </p>
-        <div class="form-group">
-          <label class="form-label">Opciones por Defecto para Inglés</label>
-          <select class="form-select" id="cfg-opts-ingles">
-            <option value="A,B,C">3 Opciones (A, B, C)</option>
-            <option value="A,B,C,D" selected>4 Opciones (A, B, C, D)</option>
-            <option value="A,B,C,D,E">5 Opciones (A, B, C, D, E)</option>
-            <option value="A,B,C,D,E,F,G,H">8 Opciones - Partes Especiales (A a H)</option>
-          </select>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+          <p style="font-size:0.75rem; font-weight:800;">Formato por Pregunta de Inglés:</p>
+          <div style="display:flex; gap:0.3rem; align-items:center;">
+            <span style="font-size:0.65rem;">Aplicar a todas:</span>
+            <select class="form-select" id="apply-all-ingles" style="width:auto; padding:0.2rem; font-size:0.7rem;" onchange="aplicarFormatoMasivoIngles(this.value)">
+              <option value="">Seleccionar...</option>
+              <option value="A,B,C">A, B, C (3 Opciones)</option>
+              <option value="A,B,C,D">A, B, C, D (4 Opciones)</option>
+              <option value="A,B,C,D,E">A, B, C, D, E (5 Opciones)</option>
+              <option value="A,B,C,D,E,F,G,H">A a H (8 Opciones)</option>
+            </select>
+          </div>
         </div>
+        <div class="ingles-grid" id="ingles-questions-grid"></div>
       </div>
 
       <!-- TAB 4: REPORTES -->
       <div id="tab-reportes" class="t-content" style="display:none;">
         <p style="font-size:0.8rem; font-weight:800;">Respuestas Registradas</p>
-        <div style="max-height:150px; overflow-y:auto; margin-bottom:1rem;">
+        <div style="max-height:130px; overflow-y:auto; margin-bottom:1rem;">
           <table id="tbl-respuestas">
             <thead><tr><th>Fecha</th><th>Estudiante</th><th>Grado</th><th>Sesión</th><th>Respondidas</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
 
-        <p style="font-size:0.8rem; font-weight:800; color:var(--red);">Monitoreo de Infracciones (Cambios de Pestaña)</p>
-        <div style="max-height:150px; overflow-y:auto;">
+        <p style="font-size:0.8rem; font-weight:800; color:var(--red);">Monitoreo de Infracciones (Intentos de Copia / Capturas / Cambios)</p>
+        <div style="max-height:130px; overflow-y:auto;">
           <table id="tbl-infracciones">
             <thead><tr><th>Fecha</th><th>Estudiante</th><th>Infracciones</th></tr></thead>
             <tbody></tbody>
@@ -372,13 +416,14 @@ let STATE = {
   respuestas: {},
   warnings: 0,
   examActive: false,
+  warningTimeout: null,
   config: {
     protocoloActivo: 'Protocolo 01',
     horas: 4,
     minutos: 30,
     s1: { mat: 25, lec: 41, soc: 25, cn: 29 },
     s2: { soc: 25, mat: 25, cn: 29, ing: 55 },
-    optsIngles: ['A','B','C','D']
+    inglesMap: {} // Guarda las opciones individuales por pregunta: e.g. { P79: ['A','B','C'], P80: ['A','B','C','D'] }
   },
   timerInterval: null,
   timeRemaining: 0
@@ -414,10 +459,13 @@ function parseConfigFromBackend(cfg){
   if(cfg.minutos) STATE.config.minutos = parseInt(cfg.minutos);
   if(cfg.s1) STATE.config.s1 = typeof cfg.s1 === 'string' ? JSON.parse(cfg.s1) : cfg.s1;
   if(cfg.s2) STATE.config.s2 = typeof cfg.s2 === 'string' ? JSON.parse(cfg.s2) : cfg.s2;
-  if(cfg.optsIngles) STATE.config.optsIngles = typeof cfg.optsIngles === 'string' ? cfg.optsIngles.split(',') : cfg.optsIngles;
+  if(cfg.inglesMap) STATE.config.inglesMap = typeof cfg.inglesMap === 'string' ? JSON.parse(cfg.inglesMap) : cfg.inglesMap;
 }
 
 function obtenerEstructuraSesiones(){
+  const s2InglesCount = STATE.config.s2.ing;
+  const s2OffsetIngles = STATE.config.s2.soc + STATE.config.s2.mat + STATE.config.s2.cn;
+
   return {
     S1: [
       { area: "Matemáticas 1", preg: STATE.config.s1.mat, offset: 0, opts: ['A','B','C','D'] },
@@ -429,7 +477,7 @@ function obtenerEstructuraSesiones(){
       { area: "Sociales 2", preg: STATE.config.s2.soc, offset: 0, opts: ['A','B','C','D'] },
       { area: "Matemáticas 2", preg: STATE.config.s2.mat, offset: STATE.config.s2.soc, opts: ['A','B','C','D'] },
       { area: "Ciencias 2", preg: STATE.config.s2.cn, offset: STATE.config.s2.soc + STATE.config.s2.mat, opts: ['A','B','C','D'] },
-      { area: "Inglés", preg: STATE.config.s2.ing, offset: STATE.config.s2.soc + STATE.config.s2.mat + STATE.config.s2.cn, opts: STATE.config.optsIngles }
+      { area: "Inglés", preg: s2InglesCount, offset: s2OffsetIngles, isIngles: true }
     ]
   };
 }
@@ -605,7 +653,6 @@ function renderizarAreas(sesionKey){
   cargarPreguntasArea(areas[0]);
 }
 
-// Carga de Preguntas en UNA SOLA LÍNEA HORIZONTAL
 function cargarPreguntasArea(itemArea){
   const list = document.getElementById('answers-list');
   list.innerHTML = '';
@@ -613,12 +660,19 @@ function cargarPreguntasArea(itemArea){
   for(let i = 1; i <= itemArea.preg; i++){
     const pregGlobalNum = itemArea.offset + i;
     const qKey = `P${pregGlobalNum}`;
+    
+    // Si es inglés, buscar opciones dinámicas personalizadas por pregunta
+    let opciones = itemArea.opts || ['A','B','C','D'];
+    if(itemArea.isIngles) {
+      opciones = STATE.config.inglesMap[qKey] || ['A','B','C','D'];
+    }
+
     const row = document.createElement('div');
     row.className = 'q-row-line';
     row.innerHTML = `
       <div class="q-num-inline">P${pregGlobalNum}</div>
       <div class="q-opts-inline">
-        ${itemArea.opts.map(opt => `
+        ${opciones.map(opt => `
           <div class="opt-bubble ${STATE.respuestas[qKey] === opt ? 'selected' : ''}" 
                onclick="marcarYGuardarRespuesta('${qKey}', '${opt}', this)">${opt}</div>
         `).join('')}
@@ -685,7 +739,7 @@ function finalizarExamen(){
     <p><strong>Estudiante:</strong> ${STATE.est.nombre}</p>
     <p><strong>Respuestas Guardadas:</strong> ${respondidas} de ${total}</p>
     <p style="color:${STATE.warnings > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:800; margin-top:0.5rem;">
-      <strong>Infracciones por cambio de pantalla:</strong> ${STATE.warnings}
+      <strong>Infracciones Registradas:</strong> ${STATE.warnings}
     </p>
   `;
 
@@ -693,6 +747,84 @@ function finalizarExamen(){
   document.getElementById('modal-report').classList.add('open');
 }
 
+/* ============================================================
+   SISTEMA DE SEGURIDAD Y ADVERTENCIAS DE 3 SEGUNDOS
+============================================================ */
+function triggerWarning(msg) {
+  if(!STATE.examActive) return;
+
+  STATE.warnings++;
+  
+  const modal = document.getElementById('center-warning-modal');
+  document.getElementById('warning-msg-text').textContent = msg;
+  modal.classList.add('active');
+
+  // Registrar en backend
+  try {
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'registrarInfraccion',
+        estudiante: STATE.est.nombre,
+        advertencias: STATE.warnings
+      })
+    });
+  } catch(e){}
+
+  // Ocultar exactamente a los 3 segundos (3000ms)
+  if(STATE.warningTimeout) clearTimeout(STATE.warningTimeout);
+  STATE.warningTimeout = setTimeout(() => {
+    modal.classList.remove('active');
+  }, 3000);
+}
+
+function initAntiCheating(){
+  // 1. Detección de cambio de pestaña / ventana
+  window.addEventListener('blur', () => triggerWarning("Intento de abandono de pantalla / cambio de pestaña."));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) triggerWarning("Ventana minimizada o fuera de foco.");
+  });
+
+  // 2. Bloqueo de Teclado (Copiar, Pegar, Captura, Herramientas dev)
+  document.addEventListener('keydown', (e) => {
+    if(!STATE.examActive) return;
+
+    // Tecla PrintScreen (Captura de pantalla)
+    if (e.key === 'PrintScreen' || e.keyCode === 44) {
+      triggerWarning("Intento de captura de pantalla detectado (PrintScreen)");
+      e.preventDefault();
+      return false;
+    }
+
+    // Atajos con Ctrl o Cmd
+    if (e.ctrlKey || e.metaKey) {
+      const k = e.key.toLowerCase();
+      if (k === 'c') { triggerWarning("Acción bloqueada: Intento de copiar contenido"); e.preventDefault(); }
+      if (k === 'v') { triggerWarning("Acción bloqueada: Intento de pegar contenido"); e.preventDefault(); }
+      if (k === 'x') { triggerWarning("Acción bloqueada: Intento de cortar contenido"); e.preventDefault(); }
+      if (k === 'a') { triggerWarning("Acción bloqueada: Selección masiva"); e.preventDefault(); }
+      if (k === 'p') { triggerWarning("Acción bloqueada: Intento de impresión / guardado"); e.preventDefault(); }
+      if (k === 'u') { triggerWarning("Acción bloqueada: Inspección de código"); e.preventDefault(); }
+      if (k === 's') { triggerWarning("Acción bloqueada: Guardar página"); e.preventDefault(); }
+    }
+
+    // F12 o Ctrl+Shift+I / J
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j'))) {
+      triggerWarning("Acción bloqueada: Acceso a Herramientas de Desarrollo");
+      e.preventDefault();
+    }
+  });
+
+  // 3. Bloqueo de copia con ratón / selección
+  document.addEventListener('copy', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Copiar texto"); e.preventDefault(); } });
+  document.addEventListener('paste', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Pegar texto"); e.preventDefault(); } });
+  document.addEventListener('cut', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Cortar texto"); e.preventDefault(); } });
+}
+
+/* ============================================================
+   PANEL DOCENTE Y CONFIGURACIÓN DINÁMICA DE INGLÉS
+============================================================ */
 function abrirModalDocente(){
   document.getElementById('teacher-pass-input').value = '';
   document.getElementById('teacher-auth-step').style.display = 'block';
@@ -739,7 +871,44 @@ function poblarCamposPanelDocente(){
   document.getElementById('cfg-s2-cn').value = STATE.config.s2.cn;
   document.getElementById('cfg-s2-ing').value = STATE.config.s2.ing;
 
-  document.getElementById('cfg-opts-ingles').value = STATE.config.optsIngles.join(',');
+  renderizarConfiguracionIngles();
+}
+
+function renderizarConfiguracionIngles(){
+  const count = parseInt(document.getElementById('cfg-s2-ing').value) || 55;
+  const soc = parseInt(document.getElementById('cfg-s2-soc').value) || 25;
+  const mat = parseInt(document.getElementById('cfg-s2-mat').value) || 25;
+  const cn = parseInt(document.getElementById('cfg-s2-cn').value) || 29;
+  const startOffset = soc + mat + cn;
+
+  const grid = document.getElementById('ingles-questions-grid');
+  grid.innerHTML = '';
+
+  for(let i = 1; i <= count; i++){
+    const pregNum = startOffset + i;
+    const qKey = `P${pregNum}`;
+    const optsActuales = (STATE.config.inglesMap && STATE.config.inglesMap[qKey]) ? STATE.config.inglesMap[qKey].join(',') : 'A,B,C,D';
+
+    const div = document.createElement('div');
+    div.className = 'ingles-item';
+    div.innerHTML = `
+      <span style="font-weight:900; font-size:0.75rem;">Pregunta ${qKey}</span>
+      <select class="form-select cfg-ing-select" data-qkey="${qKey}" style="padding:0.2rem; font-size:0.7rem;">
+        <option value="A,B,C" ${optsActuales === 'A,B,C' ? 'selected' : ''}>3 Opciones (A,B,C)</option>
+        <option value="A,B,C,D" ${optsActuales === 'A,B,C,D' ? 'selected' : ''}>4 Opciones (A,B,C,D)</option>
+        <option value="A,B,C,D,E" ${optsActuales === 'A,B,C,D,E' ? 'selected' : ''}>5 Opciones (A,B,C,D,E)</option>
+        <option value="A,B,C,D,E,F,G,H" ${optsActuales === 'A,B,C,D,E,F,G,H' ? 'selected' : ''}>8 Opciones (A a H)</option>
+      </select>
+    `;
+    grid.appendChild(div);
+  }
+}
+
+function aplicarFormatoMasivoIngles(valor){
+  if(!valor) return;
+  document.querySelectorAll('.cfg-ing-select').forEach(sel => {
+    sel.value = valor;
+  });
 }
 
 function switchTeacherTab(tabId, el){
@@ -772,6 +941,13 @@ async function cargarReportesDocente(){
 async function guardarConfiguracionDocente(){
   const pass = document.getElementById('teacher-pass-input').value.trim();
 
+  // Mapear opciones individuales de inglés
+  const inglesMap = {};
+  document.querySelectorAll('.cfg-ing-select').forEach(sel => {
+    const key = sel.getAttribute('data-qkey');
+    inglesMap[key] = sel.value.split(',');
+  });
+
   const newSettings = {
     protocoloActivo: document.getElementById('cfg-protocolo').value,
     horas: parseInt(document.getElementById('cfg-horas').value) || 0,
@@ -788,7 +964,7 @@ async function guardarConfiguracionDocente(){
       cn: parseInt(document.getElementById('cfg-s2-cn').value) || 0,
       ing: parseInt(document.getElementById('cfg-s2-ing').value) || 0
     },
-    optsIngles: document.getElementById('cfg-opts-ingles').value.split(',')
+    inglesMap: inglesMap
   };
 
   try {
@@ -807,29 +983,6 @@ async function guardarConfiguracionDocente(){
       showToast(data.error || 'Error al guardar', 'error');
     }
   } catch(e){ showToast('Error de conexión', 'error'); }
-}
-
-function initAntiCheating(){
-  window.addEventListener('blur', registrarInfraccion);
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) registrarInfraccion();
-  });
-}
-
-function registrarInfraccion(){
-  if(!STATE.examActive) return;
-  STATE.warnings++;
-  try {
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action: 'registrarInfraccion',
-        estudiante: STATE.est.nombre,
-        advertencias: STATE.warnings
-      })
-    });
-  } catch(e){}
 }
 
 function cerrarReporteYSalir(){
