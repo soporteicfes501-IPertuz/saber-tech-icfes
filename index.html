@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SABER TECH · I.E.D. San José de Sitionuevo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --primary: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --bg-main: #f8fafc;
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-600: #475569;
+  --slate-300: #cbd5e1;
+  --green: #10b981;
+  --red: #ef4444;
+  --shadow-lg: 0 25px 50px -12px rgba(15,23,42,0.15);
+  --radius: 1rem;
+}
+
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+.topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+.topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
+.topbar-brand img { height: 40px; width: auto; object-fit: contain; }
+.topbar-title { font-size: 1rem; font-weight: 900; color: var(--slate-900); }
+.topbar-subtitle { font-size: 0.7rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
+
+.screen { display: none; flex: 1; height: calc(100vh - 60px); }
+.screen.active { display: flex; }
+
+#screen-login { display: none; align-items: center; justify-content: center; padding: 2rem 1rem; background: radial-gradient(circle at top, #eff6ff 0%, #f8fafc 100%); width: 100%; }
+#screen-login.active { display: flex; }
+.login-container { width: 100%; max-width: 480px; }
+.card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 2rem; border: 1px solid rgba(226, 232, 240, 0.8); }
+
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--slate-600); margin-bottom: 0.3rem; }
+.form-select, .form-input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--slate-300); border-radius: 0.6rem; font-size: 0.9rem; background: white; }
+.form-select:focus, .form-input:focus { outline: none; border-color: var(--primary); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.8rem 1.2rem; border-radius: 0.6rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; }
+.btn-outline { background: white; color: var(--slate-600); border: 1.5px solid var(--slate-300); }
+.btn-danger { background: var(--red); color: white; }
+
+#screen-answers { display: none; width: 100%; height: calc(100vh - 60px); flex-direction: row; }
+#screen-answers.active { display: flex; }
+
+.pdf-pane { width: 75%; height: 100%; background: #525659; border-right: 2px solid var(--slate-300); }
+.pdf-pane iframe { width: 100%; height: 100%; border: none; }
+
+.answers-pane { width: 25%; height: 100%; background: white; display: flex; flex-direction: column; }
+.exam-info-bar { padding: 0.75rem; background: var(--slate-900); color: white; border-bottom: 1px solid var(--slate-300); }
+.warning-badge { background: var(--red); color: white; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 0.25rem; display: inline-block; margin-top: 0.25rem; }
+
+.area-tabs-vertical { display: flex; overflow-x: auto; padding: 0.5rem; background: #f1f5f9; border-bottom: 1px solid var(--slate-300); gap: 0.25rem; }
+.tab-btn { padding: 0.4rem 0.6rem; border-radius: 0.4rem; font-size: 0.75rem; font-weight: 700; border: 1px solid var(--slate-300); background: white; cursor: pointer; white-space: nowrap; }
+.tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.answers-list { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.q-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 0.4rem 0.6rem; border-radius: 0.5rem; border: 1px solid var(--slate-300); }
+.q-num { font-size: 0.8rem; font-weight: 800; color: var(--slate-800); width: 45px; }
+.q-opts { display: flex; gap: 0.3rem; flex: 1; justify-content: flex-end; }
+.opt-bubble { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--slate-300); background: white; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.opt-bubble.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 440px; width: 100%; box-shadow: var(--shadow-lg); }
+
+#toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--slate-900); color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 700; z-index: 300; transition: transform 0.25s ease; }
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.error { background: var(--red); }
+#toast.success { background: var(--green); }
+
+.loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 400; font-weight: 700; }
+</style>
+</head>
+<body oncontextmenu="return false;">
+
+<div class="loading-overlay" id="loading-overlay">
+  <p>Cargando datos del sistema evaluativo…</p>
+</div>
+
+<div id="toast"></div>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="IMAGENSANJOSE.png" alt="Logo" onerror="this.style.display='none'">
+    <div>
+      <div class="topbar-title">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
+      <div class="topbar-subtitle">Plataforma Digital Saber 11</div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-login" class="screen active">
+  <div class="login-container">
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Protocolo de Entrenamiento</label>
+        <select class="form-select" id="select-protocolo" onchange="validarFormLogin()">
+          <option value="">Seleccionar protocolo…</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Grado / Curso</label>
+        <select class="form-select" id="select-curso" onchange="filtrarEstudiantesPorCurso()">
+          <option value="">Seleccionar grado…</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Estudiante</label>
+        <select class="form-select" id="select-estudiante" onchange="validarFormLogin()" disabled>
+          <option value="">Primero selecciona tu grado…</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Sesión a Responder</label>
+        <select class="form-select" id="select-sesion" onchange="validarFormLogin()">
+          <option value="S1">Sesión 1 (Mañana)</option>
+          <option value="S2">Sesión 2 (Tarde)</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" id="btn-iniciar" onclick="solicitarAccesoEstudiante()" disabled>
+        Comenzar Examen →
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal-box">
+    <h3 style="margin-bottom:0.5rem;font-weight:900;" id="auth-modal-title">🔐 Autenticación</h3>
+    <p style="font-size:0.85rem;color:var(--slate-600);margin-bottom:1rem;" id="auth-modal-body"></p>
+    
+    <div class="form-group">
+      <label class="form-label" id="auth-label-pass">Contraseña</label>
+      <input type="password" class="form-input" id="auth-input-pass" placeholder="Ingresa tu clave">
+    </div>
+
+    <div class="form-group" id="auth-confirm-group" style="display:none">
+      <label class="form-label">Confirmar Contraseña</label>
+      <input type="password" class="form-input" id="auth-input-pass-confirm" placeholder="Repite tu clave">
+    </div>
+
+    <div style="display:flex;gap:0.5rem;margin-top:1rem">
+      <button class="btn btn-outline" onclick="cerrarModal('modal-auth')">Cancelar</button>
+      <button class="btn btn-primary" onclick="ejecutarAutenticacion()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-answers" class="screen">
+  <div class="pdf-pane">
+    <iframe id="pdf-frame" src="about:blank"></iframe>
+  </div>
+
+  <div class="answers-pane">
+    <div class="exam-info-bar">
+      <div style="font-weight:800;font-size:0.85rem;" id="display-nombre">Estudiante</div>
+      <div style="font-size:0.7rem;opacity:0.8" id="display-info">Grado · Sesión</div>
+      <div id="warning-container" style="display:none;">
+        <span class="warning-badge" id="warning-count">⚠️ Cambios de ventana: 0</span>
+      </div>
+    </div>
+
+    <div class="area-tabs-vertical" id="area-tabs"></div>
+    <div class="answers-list" id="answers-list"></div>
+
+    <div style="padding:0.75rem; border-top:1px solid var(--slate-300);">
+      <button class="btn btn-danger" onclick="finalizarExamen()">Finalizar Examen</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-report">
+  <div class="modal-box">
+    <h3 style="margin-bottom:0.5rem;font-weight:900;">📋 Resumen de Entrega</h3>
+    <div id="report-content" style="font-size:0.85rem; line-height:1.5; margin-bottom:1rem;"></div>
+    <button class="btn btn-primary" onclick="cerrarReporteYSalir()">Aceptar y Salir</button>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec';
+
+// Nombres exactos de archivos localizados en el directorio
+const PDF_FILES = {
+  S1: '2026 2 SESIÓN 1_compressed.pdf',
+  S2: '2026 2 SESIÓN 2_compressed.pdf'
+};
+
+const ESTRUCTURA_SESIONES = {
+  S1: [
+    { area: "Matemáticas 1", preg: 25, offset: 0 },
+    { area: "Lectura Crítica", preg: 41, offset: 25 },
+    { area: "Sociales 1", preg: 25, offset: 66 },
+    { area: "Ciencias 1", preg: 29, offset: 91 }
+  ],
+  S2: [
+    { area: "Sociales 2", preg: 25, offset: 0 },
+    { area: "Ciencias 2", preg: 29, offset: 25 },
+    { area: "Inglés", preg: 55, offset: 54 },
+    { area: "Matemáticas 2", preg: 25, offset: 109 }
+  ]
+};
+
+let STATE = { 
+  estudiantes: [], 
+  est: null, 
+  claves: {}, 
+  respuestas: {},
+  warnings: 0,
+  examActive: false
+};
+
+window.addEventListener('DOMContentLoaded', async () => {
+  poblarProtocolos();
+  await cargarEstudiantes();
+  initAntiCheating();
+});
+
+async function cargarEstudiantes(){
+  try {
+    const r = await fetch(GAS_URL + '?action=getInit');
+    const data = await r.json();
+    if(data.success && data.estudiantes){
+      STATE.estudiantes = data.estudiantes;
+      STATE.claves = data.claves || {};
+    }
+  } catch(e) { console.error(e); }
+  finally {
+    document.getElementById('loading-overlay').style.display = 'none';
+    poblarCursos();
+  }
+}
+
+function poblarProtocolos(){
+  const sel = document.getElementById('select-protocolo');
+  sel.innerHTML = '<option value="">Seleccionar protocolo…</option>';
+  for(let i=1; i<=5; i++){
+    const num = i.toString().padStart(2,'0');
+    sel.appendChild(new Option(`Protocolo ${num} · 2026`, `Protocolo ${num}`));
+  }
+}
+
+function poblarCursos(){
+  const byCurso = {};
+  STATE.estudiantes.forEach(e => {
+    const g = e.grado || 'GENERAL';
+    if(!byCurso[g]) byCurso[g] = [];
+    byCurso[g].push(e);
+  });
+  STATE._byCurso = byCurso;
+
+  const selCurso = document.getElementById('select-curso');
+  selCurso.innerHTML = '<option value="">Seleccionar grado…</option>';
+  Object.keys(byCurso).sort().forEach(g => {
+    selCurso.appendChild(new Option(`Grado ${g}`, g));
+  });
+}
+
+function filtrarEstudiantesPorCurso(){
+  const curso = document.getElementById('select-curso').value;
+  const selEst = document.getElementById('select-estudiante');
+  selEst.innerHTML = '<option value="">Seleccionar estudiante…</option>';
+  
+  if(!curso || !STATE._byCurso[curso]){
+    selEst.disabled = true;
+    validarFormLogin();
+    return;
+  }
+
+  STATE._byCurso[curso].sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach((e, i) => {
+    selEst.appendChild(new Option(e.nombre, i));
+  });
+  selEst.disabled = false;
+  validarFormLogin();
+}
+
+function validarFormLogin(){
+  const p = document.getElementById('select-protocolo').value;
+  const c = document.getElementById('select-curso').value;
+  const e = document.getElementById('select-estudiante').value;
+  const s = document.getElementById('select-sesion').value;
+  document.getElementById('btn-iniciar').disabled = !(p && c && e !== "" && s);
+}
+
+function solicitarAccesoEstudiante(){
+  const curso = document.getElementById('select-curso').value;
+  const idx = document.getElementById('select-estudiante').value;
+  STATE.est = STATE._byCurso[curso][parseInt(idx)];
+  
+  const claveGuardada = STATE.claves[STATE.est.nombre];
+  document.getElementById('auth-input-pass').value = '';
+  document.getElementById('auth-input-pass-confirm').value = '';
+
+  if(!claveGuardada){
+    document.getElementById('auth-modal-title').textContent = '🔑 Crear Contraseña';
+    document.getElementById('auth-modal-body').textContent = `Estudiante: ${STATE.est.nombre}. Crea tu clave personal.`;
+    document.getElementById('auth-confirm-group').style.display = 'block';
+  } else {
+    document.getElementById('auth-modal-title').textContent = '🔐 Contraseña Requerida';
+    document.getElementById('auth-modal-body').textContent = `Ingresa tu clave para continuar, ${STATE.est.nombre}.`;
+    document.getElementById('auth-confirm-group').style.display = 'none';
+  }
+
+  document.getElementById('modal-auth').classList.add('open');
+}
+
+async function ejecutarAutenticacion(){
+  const pass = document.getElementById('auth-input-pass').value.trim();
+  const nombre = STATE.est.nombre;
+  const claveGuardada = STATE.claves[nombre];
+
+  if(!claveGuardada){
+    const confirm = document.getElementById('auth-input-pass-confirm').value.trim();
+    if(pass.length < 4){ showToast('La clave debe tener mínimo 4 caracteres', 'error'); return; }
+    if(pass !== confirm){ showToast('Las contraseñas NO coinciden', 'error'); return; }
+
+    showToast('Guardando contraseña...');
+    
+    try {
+      const resp = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'registrarClave', estudiante: nombre, clave: pass })
+      });
+      const data = await resp.json();
+      
+      if(data.success) {
+        STATE.claves[nombre] = pass;
+        showToast('Clave registrada en hoja ESTUDIANTES', 'success');
+        cerrarModal('modal-auth');
+        iniciarExamen();
+      } else {
+        showToast(data.error || 'Error al registrar clave', 'error');
+      }
+    } catch(e) {
+      showToast('Error de conexión al servidor', 'error');
+    }
+  } else {
+    if(claveGuardada === pass){
+      cerrarModal('modal-auth');
+      iniciarExamen();
+    } else {
+      showToast('Contraseña incorrecta', 'error');
+    }
+  }
+}
+
+function iniciarExamen(){
+  mostrarScreen('screen-answers');
+  STATE.examActive = true;
+  STATE.warnings = 0;
+  
+  const sesion = document.getElementById('select-sesion').value;
+  document.getElementById('display-nombre').textContent = STATE.est.nombre;
+  document.getElementById('display-info').textContent = `${STATE.est.grado} · ${sesion === 'S1' ? 'Sesión 1' : 'Sesión 2'}`;
+  
+  // Asignación limpia del PDF evitando dobles codificaciones de URI
+  const pdfArchivo = PDF_FILES[sesion] || '2026 2 SESIÓN 1_compressed.pdf';
+  document.getElementById('pdf-frame').src = `./${pdfArchivo}#toolbar=0&navpanes=0`;
+
+  renderizarAreas(sesion);
+}
+
+function renderizarAreas(sesionKey){
+  const areas = ESTRUCTURA_SESIONES[sesionKey];
+  const tabsContainer = document.getElementById('area-tabs');
+  tabsContainer.innerHTML = '';
+
+  areas.forEach((item, index) => {
+    const btn = document.createElement('button');
+    btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+    btn.textContent = `${item.area}`;
+    btn.onclick = () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      cargarPreguntasArea(item);
+    };
+    tabsContainer.appendChild(btn);
+  });
+
+  cargarPreguntasArea(areas[0]);
+}
+
+function cargarPreguntasArea(itemArea){
+  const list = document.getElementById('answers-list');
+  list.innerHTML = '';
+
+  for(let i = 1; i <= itemArea.preg; i++){
+    const pregGlobalNum = itemArea.offset + i;
+    const qKey = `P${pregGlobalNum}`;
+    const row = document.createElement('div');
+    row.className = 'q-row';
+    row.innerHTML = `
+      <div class="q-num">P${pregGlobalNum}</div>
+      <div class="q-opts">
+        ${['A','B','C','D'].map(opt => `
+          <div class="opt-bubble ${STATE.respuestas[qKey] === opt ? 'selected' : ''}" 
+               onclick="marcarYGuardarRespuesta('${qKey}', '${opt}', this)">${opt}</div>
+        `).join('')}
+      </div>
+    `;
+    list.appendChild(row);
+  }
+}
+
+async function marcarYGuardarRespuesta(qKey, opcion, el){
+  STATE.respuestas[qKey] = opcion;
+  const parent = el.parentElement;
+  parent.querySelectorAll('.opt-bubble').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const protocolo = document.getElementById('select-protocolo').value;
+  const sesion = document.getElementById('select-sesion').value;
+
+  try {
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'guardarRespuesta',
+        estudiante: STATE.est.nombre,
+        grado: STATE.est.grado,
+        protocolo: protocolo,
+        sesion: sesion,
+        pregunta: qKey,
+        respuesta: opcion
+      })
+    });
+  } catch(e) {
+    console.error('Error enviando respuesta', e);
+  }
+}
+
+function initAntiCheating(){
+  window.addEventListener('blur', registrarInfraccion);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) registrarInfraccion();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'PrintScreen' || 
+       (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || (e.shiftKey && e.key === 'I')))) {
+      e.preventDefault();
+      showToast('🚫 Acción bloqueada por seguridad', 'error');
+    }
+  });
+}
+
+function registrarInfraccion(){
+  if(!STATE.examActive) return;
+  STATE.warnings++;
+  
+  const badge = document.getElementById('warning-count');
+  badge.textContent = `⚠️ Cambios de ventana: ${STATE.warnings}`;
+  document.getElementById('warning-container').style.display = 'block';
+
+  showToast(`⚠️ Alerta: Saliste de la prueba (${STATE.warnings}). Se guardará en el informe.`, 'error');
+
+  try {
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'registrarInfraccion',
+        estudiante: STATE.est.nombre,
+        advertencias: STATE.warnings
+      })
+    });
+  } catch(e){}
+}
+
+function finalizarExamen(){
+  STATE.examActive = false;
+  const respondidas = Object.keys(STATE.respuestas).length;
+  
+  const html = `
+    <p><strong>Estudiante:</strong> ${STATE.est.nombre}</p>
+    <p><strong>Grado:</strong> ${STATE.est.grado}</p>
+    <p><strong>Respuestas marcadas:</strong> ${respondidas}</p>
+    <p style="color:${STATE.warnings > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:800; margin-top:0.5rem;">
+      <strong>Infracciones por ventana:</strong> ${STATE.warnings}
+    </p>
+  `;
+
+  document.getElementById('report-content').innerHTML = html;
+  document.getElementById('modal-report').classList.add('open');
+}
+
+function cerrarReporteYSalir(){
+  cerrarModal('modal-report');
+  mostrarLogin();
+}
+
+function mostrarScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function mostrarLogin(){ mostrarScreen('screen-login'); }
+function cerrarModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function showToast(msg, type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
