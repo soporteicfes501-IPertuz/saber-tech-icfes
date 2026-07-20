@@ -702,52 +702,81 @@ function cargarConfigDesdeStorage(){
 }
 
 async function cargarEstudiantes(){
-  const gasUrl=localStorage.getItem(GAS_URL_KEY);
+  const gasUrl=localStorage.getItem(GAS_URL_KEY)||GAS_URL_DEFAULT;
+
+  const hideLoader=()=>{
+    const el=document.getElementById('loading-overlay');
+    if(el) el.style.display='none';
+  };
+
   const tryGAS=async()=>{
-    const r=await fetch(gasUrl+'?action=getInit',{mode:'cors'});
+    // GAS necesita no-cors o un proxy — usamos fetch con mode cors
+    const r=await fetch(gasUrl+'?action=getInit');
     const data=await r.json();
-    if(!data.success) throw new Error(data.error);
+    if(!data.success) throw new Error(data.error||'GAS error');
     STATE.estudiantes=data.estudiantes||[];
     STATE.claves=data.claves||{};
     localStorage.setItem('saber_tech_ests',JSON.stringify(STATE.estudiantes));
     localStorage.setItem(CLAVES_KEY,JSON.stringify(STATE.claves));
     poblarSelectEstudiantes();
     const nc=Object.keys(STATE.claves).length;
-    if(nc>0) showToast('\u2705 '+nc+' áreas con claves cargadas','success');
+    if(nc>0) showToast('\u2705 Claves cargadas ('+nc+' \u00e1reas)','success');
   };
+
   const tryGViz=async()=>{
-    const r=await fetch(SHEETS_URL,{mode:'cors'});
+    const r=await fetch(SHEETS_URL);
     const t=await r.text();
-    const js=t.replace(/^.*?\(/,'').replace(/\);\s*$/,'');
+    const js=t.replace(/^[^\(]+\(/,'').replace(/\);\s*$/,'');
     const d=JSON.parse(js);
-    STATE.estudiantes=d.table.rows.filter(r=>r.c&&r.c[0]&&r.c[0].v)
-      .map(r=>({nombre:r.c[0].v.toString().trim(),grado:r.c[1]?(r.c[1].v||'').toString().trim():''}));
+    const rows=d.table&&d.table.rows?d.table.rows:[];
+    STATE.estudiantes=rows
+      .filter(r=>r.c&&r.c[0]&&r.c[0].v)
+      .map(r=>({
+        nombre:r.c[0].v.toString().trim(),
+        grado:r.c[1]?(r.c[1].v||'').toString().trim():''
+      }));
     const cc=localStorage.getItem(CLAVES_KEY);
     if(cc) STATE.claves=JSON.parse(cc);
     localStorage.setItem('saber_tech_ests',JSON.stringify(STATE.estudiantes));
     poblarSelectEstudiantes();
-    showToast('\u26A0\uFE0F Claves desde cach\u00e9 local','');
+    showToast('\u26a0\ufe0f Claves desde cach\u00e9','');
   };
+
   const tryCache=()=>{
     const ec=localStorage.getItem('saber_tech_ests');
     const cc=localStorage.getItem(CLAVES_KEY);
     if(ec) STATE.estudiantes=JSON.parse(ec);
     if(cc) STATE.claves=JSON.parse(cc);
-    if(STATE.estudiantes.length>0){poblarSelectEstudiantes();showToast('\u26A0\uFE0F Datos en cach\u00e9','');}
-    else poblarFallback();
+    if(STATE.estudiantes.length>0){
+      poblarSelectEstudiantes();
+      showToast('\u26a0\ufe0f Usando datos en cach\u00e9 local','');
+    } else {
+      poblarFallback();
+      showToast('\u274c Sin conexi\u00f3n y sin cach\u00e9','error');
+    }
   };
+
+  // Siempre ocultar el loader después de 8s como máximo
+  const safetyTimer=setTimeout(()=>{ hideLoader(); }, 8000);
+
   (async()=>{
     try{
-      if(gasUrl){await tryGAS();}
-      else{await tryGViz();}
+      await tryGAS();
     }catch(e1){
-      try{await tryGViz();}
-      catch(e2){tryCache();}
+      console.warn('GAS falló:',e1.message,'. Intentando gviz...');
+      try{
+        await tryGViz();
+      }catch(e2){
+        console.warn('gviz falló:',e2.message,'. Usando caché...');
+        tryCache();
+      }
     }finally{
-      document.getElementById('loading-overlay').style.display='none';
+      clearTimeout(safetyTimer);
+      hideLoader();
     }
   })();
 }
+
 function poblarSelectEstudiantes(){
   // Agrupar por grado/curso
   const byCurso={};
