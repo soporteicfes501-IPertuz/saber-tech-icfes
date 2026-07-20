@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SABER TECH · Sistema ICFES I.E.D. San José de Sitionuevo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --blue:#2563eb; --blue-dark:#1d4ed8; --blue-light:#eff6ff;
+  --slate:#0f172a; --slate-800:#1e293b; --slate-600:#475569;
+  --slate-400:#94a3b8; --slate-300:#cbd5e1; --slate-100:#f1f5f9; --slate-50:#f8fafc;
+  --green:#16a34a; --red:#dc2626; --amber:#d97706;
+  --r-xl:2rem; --r-lg:1rem; --r-md:.75rem;
+  --shadow:0 20px 60px -10px rgba(15,23,42,.12);
+  --shadow-sm:0 4px 16px -2px rgba(15,23,42,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--slate-50);color:var(--slate);min-height:100vh;line-height:1.5;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{background:white;border-bottom:1px solid var(--slate-300);padding:0 1.5rem;height:75px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+.topbar-brand{display:flex;align-items:center;gap:1rem;font-weight:800;font-size:1.1rem;letter-spacing:-.02em}
+.topbar-brand img{height:52px;width:auto;object-fit:contain}
+.topbar-subtitle{font-size:.7rem;color:var(--slate-600);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.topbar-credit{font-size:.7rem;color:var(--blue-dark);font-weight:800;letter-spacing:.02em;background:var(--blue-light);padding:.35rem .8rem;border-radius:1rem;border:1px solid rgba(37,99,235,.2)}
+
+/* SCREENS */
+.screen{display:none;flex:1}
+.screen.active{display:block}
+
+/* CARDS */
+.card{background:white;border-radius:var(--r-xl);box-shadow:var(--shadow);padding:2.5rem;border:1px solid rgba(203,213,225,.6)}
+.card-sm{background:white;border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:1.5rem;border:1px solid rgba(203,213,225,.4)}
+
+/* LOGIN */
+#screen-login{display:none;min-height:calc(100vh - 75px);align-items:center;justify-content:center;padding:2rem 1rem;background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 50%,#f0fdf4 100%)}
+#screen-login.active{display:flex;flex-direction:column}
+.login-container{width:100%;max-width:520px}
+.login-logo{text-align:center;margin-bottom:1.5rem}
+.login-logo img{height:95px;margin-bottom:.75rem;object-fit:contain}
+.login-logo h1{font-size:1.45rem;font-weight:900;letter-spacing:-.03em;color:var(--slate-800);line-height:1.2}
+.login-logo h2{font-size:1.05rem;font-weight:700;color:var(--blue);margin-top:.25rem}
+.login-logo p{font-size:.85rem;color:var(--slate-600);margin-top:.2rem;font-weight:500}
+
+.form-group{margin-bottom:1.25rem}
+.form-label{display:block;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--slate-600);margin-bottom:.4rem}
+.form-select,.form-input{width:100%;padding:.875rem 1rem;border:1.5px solid var(--slate-300);border-radius:var(--r-md);font-size:.95rem;color:var(--slate);background:white;transition:border-color .15s,box-shadow .15s}
+.form-select:focus,.form-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.875rem 1.5rem;border-radius:var(--r-md);font-size:.95rem;font-weight:700;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--blue);color:white;width:100%}
+.btn-primary:hover:not(:disabled){background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.3)}
+.btn-outline{background:white;color:var(--slate);border:1.5px solid var(--slate-300)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-ghost{background:transparent;color:var(--slate-600)}
+.btn-ghost:hover{background:var(--slate-100);color:var(--slate-800)}
+.btn-success{background:var(--green);color:white}
+.btn-sm{padding:.5rem 1rem;font-size:.85rem}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+/* FOOTER */
+.app-footer{text-align:center;padding:1.5rem;background:white;border-top:1px solid var(--slate-300);font-size:.78rem;font-weight:700;color:var(--slate-600);margin-top:auto}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.65);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal-box{background:white;border-radius:var(--r-xl);padding:2rem;max-width:480px;width:100%;box-shadow:0 40px 80px rgba(15,23,42,.25)}
+.modal-title{font-size:1.25rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.75rem}
+.modal-body{color:var(--slate-600);font-size:.9rem;line-height:1.6;margin-bottom:1.25rem}
+.modal-actions{display:flex;gap:.75rem;margin-top:1.25rem}
+.modal-actions .btn{flex:1}
+
+/* EXAM UI & MANAGER UI */
+.answers-header{background:white;border-bottom:1px solid var(--slate-300);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.student-badge{display:flex;align-items:center;gap:.625rem;background:var(--blue-light);border:1.5px solid rgba(37,99,235,.2);border-radius:3rem;padding:.5rem 1rem}
+.student-badge .avatar{width:34px;height:34px;background:var(--blue);border-radius:50%;color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem}
+
+#screen-manager{padding:2rem 1rem;background:var(--slate-50)}
+.manager-wrap{max-width:750px;margin:0 auto}
+
+/* TOAST & LOADING */
+#toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--slate);color:white;padding:.875rem 1.75rem;border-radius:var(--r-md);font-size:.9rem;font-weight:600;z-index:500;transition:transform .3s;border-radius:var(--r-md)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green)}
+#toast.error{background:var(--red)}
+
+.loading-overlay{position:fixed;inset:0;background:rgba(248,250,252,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:400;gap:1rem}
+.loading-spinner-lg{width:48px;height:48px;border:4px solid var(--slate-300);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner-lg"></div>
+  <p style="color:var(--slate-800);font-size:1rem;font-weight:700">Cargando datos institucionales…</p>
+</div>
+
+<div id="toast"></div>
+
+<!-- TOPBAR ENCABEZADO -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <img src="IMAGENSANJOSE.png" alt="Logo I.E.D. San José de Sitionuevo" id="topbar-logo">
+    <div>
+      <div style="font-size:1rem;font-weight:900;color:var(--slate-800)">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
+      <div class="topbar-subtitle">Sistema Digital de Entrenamientos Saber 11</div>
+    </div>
+  </div>
+  <div class="topbar-credit">DESARROLLADO POR LA SABER TECH, BY ISRAEL PERTUZ</div>
+</div>
+
+<!-- ══ SCREEN 1: LOGIN / SELECCIÓN ════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-container">
+    <div class="login-logo">
+      <img src="IMAGENSANJOSE.png" alt="Logo Institucional">
+      <h1>I.E.D. SAN JOSÉ DE SITIONUEVO</h1>
+      <h2>Plataforma de Simulación Saber 11</h2>
+      <p>Acompañamiento Evaluativo e Innovación Digital</p>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Protocolo de Entrenamiento</label>
+        <select class="form-select" id="select-protocolo" onchange="validarFormLogin()">
+          <option value="">Seleccionar protocolo…</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Grado / Curso</label>
+        <select class="form-select" id="select-curso" onchange="filtrarEstudiantesPorCurso()">
+          <option value="">Seleccionar grado…</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Estudiante</label>
+        <select class="form-select" id="select-estudiante" onchange="validarFormLogin()" disabled>
+          <option value="">Primero selecciona tu grado…</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Sesión a Responder</label>
+        <select class="form-select" id="select-sesion" onchange="validarFormLogin()">
+          <option value="S1">Sesión 1 · Mañana</option>
+          <option value="S2">Sesión 2 · Tarde</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" id="btn-iniciar" onclick="solicitarAccesoEstudiante()" disabled>
+        Comenzar a Responder →
+      </button>
+
+      <div style="height:1px;background:var(--slate-300);margin:1.5rem 0"></div>
+
+      <div style="display:flex;gap:.5rem">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="solicitarAccesoProfesor()">🖥️ Panel Profesor (Protegido)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DE SEGURIDAD / CREAR O INGRESAR CONTRASEÑA ══ -->
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal-box">
+    <div class="modal-title" id="auth-modal-title">🔐 Autenticación de Usuario</div>
+    <div class="modal-body" id="auth-modal-body">Ingresa tus datos para continuar.</div>
+    
+    <div class="form-group">
+      <label class="form-label" id="auth-label-pass">Contraseña</label>
+      <input type="password" class="form-input" id="auth-input-pass" placeholder="Escribe tu clave aquí…">
+    </div>
+
+    <div class="form-group" id="auth-confirm-group" style="display:none">
+      <label class="form-label">Confirmar Contraseña</label>
+      <input type="password" class="form-input" id="auth-input-pass-confirm" placeholder="Repite tu clave aquí…">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal('modal-auth')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-confirm-auth" onclick="ejecutarAutenticacion()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: EXAMEN / RESPUESTAS ═════════════════ -->
+<div id="screen-answers" class="screen">
+  <div class="answers-header">
+    <div class="student-badge">
+      <div class="avatar" id="avatar-initials">--</div>
+      <div>
+        <div style="font-weight:800;font-size:.95rem" id="display-nombre">Nombre Estudiante</div>
+        <div style="font-size:.78rem;color:var(--slate-600)" id="display-info">Grado · Protocolo</div>
+      </div>
+    </div>
+    <div style="flex:1"></div>
+    <button class="btn btn-outline btn-sm" onclick="mostrarLogin()">← Salir</button>
+  </div>
+  <div style="padding:2rem;text-align:center">
+    <h3>Módulo de Respuestas Activo</h3>
+    <p style="color:var(--slate-600)">Selecciona la opción correcta en cada ítem evaluado.</p>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: PANEL DEL PROFESOR (TOTALMENTE PROTEGIDO) ══ -->
+<div id="screen-manager" class="screen">
+  <div class="manager-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div>
+        <h2 style="font-size:1.4rem;font-weight:900">Panel Docente - SABER TECH</h2>
+        <p style="font-size:.85rem;color:var(--slate-600)">I.E.D. San José de Sitionuevo</p>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="cerrarPanelProfesor()">🔒 Cerrar Sesión Docente</button>
+    </div>
+
+    <div class="card-sm" style="margin-bottom:1rem">
+      <h4 style="margin-bottom:.5rem">Servidor Google Apps Script</h4>
+      <input type="url" class="form-input" id="input-gas-url" style="font-family:monospace;font-size:.85rem">
+      <div style="margin-top:1rem">
+        <button class="btn btn-primary btn-sm" onclick="guardarConfig()">Guardar Configuración</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER SIEMPRE VISIBLE -->
+<footer class="app-footer">
+  I.E.D. SAN JOSÉ DE SITIONUEVO · DESARROLLADO POR LA SABER TECH, BY ISRAEL PERTUZ
+</footer>
+
+<script>
+const GAS_URL_KEY     = 'saber_tech_gas_url';
+const GAS_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec';
+const ADMIN_PIN       = '2024';
+
+let STATE = {
+  estudiantes: [],
+  est: null,
+  claves: {},
+  authTarget: '',
+  isProfesorAuth: false
+};
+
+window.addEventListener('DOMContentLoaded', async () => {
+  if(!localStorage.getItem(GAS_URL_KEY)) localStorage.setItem(GAS_URL_KEY, GAS_URL_DEFAULT);
+  poblarProtocolos();
+  await cargarEstudiantes();
+});
+
+async function cargarEstudiantes(){
+  const gasUrl = localStorage.getItem(GAS_URL_KEY) || GAS_URL_DEFAULT;
+  try {
+    const r = await fetch(gasUrl + '?action=getInit');
+    const data = await r.json();
+    if(data.success && data.estudiantes){
+      STATE.estudiantes = data.estudiantes;
+      STATE.claves = data.claves || {};
+      localStorage.setItem('saber_tech_ests', JSON.stringify(STATE.estudiantes));
+      localStorage.setItem('saber_tech_claves', JSON.stringify(STATE.claves));
+    }
+  } catch(e) {
+    const localEst = localStorage.getItem('saber_tech_ests');
+    const localClav = localStorage.getItem('saber_tech_claves');
+    if(localEst) STATE.estudiantes = JSON.parse(localEst);
+    if(localClav) STATE.claves = JSON.parse(localClav);
+  } finally {
+    document.getElementById('loading-overlay').style.display='none';
+    poblarCursos();
+  }
+}
+
+function poblarProtocolos(){
+  const sel = document.getElementById('select-protocolo');
+  sel.innerHTML = '<option value="">Seleccionar protocolo…</option>';
+  for(let i=1; i<=5; i++){
+    const num = i.toString().padStart(2,'0');
+    const o = document.createElement('option');
+    o.value = `Protocolo ${num}`;
+    o.textContent = `Protocolo ${num} · Año 2026`;
+    sel.appendChild(o);
+  }
+}
+
+function poblarCursos(){
+  const byCurso = {};
+  STATE.estudiantes.forEach(e => {
+    const g = e.grado || 'GENERAL';
+    if(!byCurso[g]) byCurso[g] = [];
+    byCurso[g].push(e);
+  });
+  STATE._byCurso = byCurso;
+
+  const selCurso = document.getElementById('select-curso');
+  selCurso.innerHTML = '<option value="">Seleccionar grado…</option>';
+  
+  Object.keys(byCurso).sort().forEach(g => {
+    const o = document.createElement('option');
+    o.value = g;
+    o.textContent = `Grado ${g} (${byCurso[g].length} estudiantes)`;
+    selCurso.appendChild(o);
+  });
+}
+
+function filtrarEstudiantesPorCurso(){
+  const curso = document.getElementById('select-curso').value;
+  const selEst = document.getElementById('select-estudiante');
+  selEst.innerHTML = '<option value="">Seleccionar estudiante…</option>';
+  
+  if(!curso || !STATE._byCurso[curso]){
+    selEst.disabled = true;
+    validarFormLogin();
+    return;
+  }
+
+  STATE._byCurso[curso].sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach((e, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = e.nombre;
+    selEst.appendChild(o);
+  });
+
+  selEst.disabled = false;
+  validarFormLogin();
+}
+
+function validarFormLogin(){
+  const p = document.getElementById('select-protocolo').value;
+  const c = document.getElementById('select-curso').value;
+  const e = document.getElementById('select-estudiante').value;
+  const s = document.getElementById('select-sesion').value;
+  const btn = document.getElementById('btn-iniciar');
+  
+  if(p && c && e !== "" && s){
+    btn.disabled = false;
+  } else {
+    btn.disabled = true;
+  }
+}
+
+// ── SISTEMA DE AUTENTICACIÓN / VALIDACIÓN Y GUARDADO DE KEY ──
+function solicitarAccesoEstudiante(){
+  const curso = document.getElementById('select-curso').value;
+  const idx = document.getElementById('select-estudiante').value;
+  const est = STATE._byCurso[curso][parseInt(idx)];
+  if(!est) return;
+
+  STATE.est = est;
+  STATE.authTarget = 'ESTUDIANTE';
+  
+  const claveGuardada = STATE.claves[est.nombre];
+
+  document.getElementById('auth-input-pass').value = '';
+  document.getElementById('auth-input-pass-confirm').value = '';
+
+  if(!claveGuardada){
+    document.getElementById('auth-modal-title').textContent = '🔑 Crear Contraseña Institucional';
+    document.getElementById('auth-modal-body').textContent = `Hola ${est.nombre}, como es tu primer ingreso, crea una contraseña para proteger tu acceso. Esta contraseña quedará registrada en la institución.`;
+    document.getElementById('auth-label-pass').textContent = 'Crear Contraseña';
+    document.getElementById('auth-confirm-group').style.display = 'block';
+  } else {
+    document.getElementById('auth-modal-title').textContent = '🔐 Contraseña Registrada';
+    document.getElementById('auth-modal-body').textContent = `Hola ${est.nombre}, ingresa tu contraseña institucional.`;
+    document.getElementById('auth-label-pass').textContent = 'Contraseña';
+    document.getElementById('auth-confirm-group').style.display = 'none';
+  }
+
+  document.getElementById('modal-auth').classList.add('open');
+}
+
+function solicitarAccesoProfesor(){
+  STATE.authTarget = 'PROFESOR';
+  document.getElementById('auth-modal-title').textContent = '👨‍🏫 Acceso Docente Restringido';
+  document.getElementById('auth-modal-body').textContent = 'Por seguridad, ingresa la clave de profesor para ver esta sección.';
+  document.getElementById('auth-label-pass').textContent = 'PIN / Clave Docente';
+  document.getElementById('auth-confirm-group').style.display = 'none';
+  document.getElementById('auth-input-pass').value = '';
+  document.getElementById('modal-auth').classList.add('open');
+}
+
+async function ejecutarAutenticacion(){
+  const pass = document.getElementById('auth-input-pass').value.trim();
+  if(!pass){ showToast('Ingresa la contraseña requerida','error'); return; }
+
+  if(STATE.authTarget === 'PROFESOR'){
+    if(pass === ADMIN_PIN){
+      STATE.isProfesorAuth = true;
+      cerrarModal('modal-auth');
+      mostrarScreen('screen-manager');
+      document.getElementById('input-gas-url').value = localStorage.getItem(GAS_URL_KEY) || GAS_URL_DEFAULT;
+      showToast('Acceso Docente Concedido','success');
+    } else {
+      showToast('❌ PIN Docente Incorrecto','error');
+    }
+    return;
+  }
+
+  // FLUJO ESTUDIANTE
+  const nombre = STATE.est.nombre;
+  const claveGuardada = STATE.claves[nombre];
+
+  if(!claveGuardada){
+    // REGISTRO DE NUEVA CONTRASEÑA
+    const confirm = document.getElementById('auth-input-pass-confirm').value.trim();
+    if(pass.length < 4){ showToast('La contraseña debe tener al menos 4 caracteres','error'); return; }
+    if(pass !== confirm){ showToast('Las contraseñas no coinciden','error'); return; }
+    
+    showToast('⏳ Registrando contraseña en base de datos…');
+    
+    // Guardar en Apps Script (Columna KEY de la hoja ESTUDIANTES)
+    const url = localStorage.getItem(GAS_URL_KEY) || GAS_URL_DEFAULT;
+    try {
+      await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'text/plain'},
+        body: JSON.stringify({
+          action: 'registrarClave',
+          estudiante: nombre,
+          clave: pass
+        })
+      });
+    } catch(e) { console.error(e); }
+
+    STATE.claves[nombre] = pass;
+    localStorage.setItem('saber_tech_claves', JSON.stringify(STATE.claves));
+    
+    showToast('✅ Contraseña guardada con éxito','success');
+    cerrarModal('modal-auth');
+    iniciarExamen();
+  } else {
+    // VERIFICACIÓN DE CONTRASEÑA EXISTENTE
+    if(claveGuardada === pass){
+      cerrarModal('modal-auth');
+      iniciarExamen();
+    } else {
+      showToast('❌ Contraseña incorrecta','error');
+    }
+  }
+}
+
+function iniciarExamen(){
+  mostrarScreen('screen-answers');
+  document.getElementById('display-nombre').textContent = STATE.est.nombre;
+  document.getElementById('display-info').textContent = `${STATE.est.grado} · ${document.getElementById('select-protocolo').value}`;
+  const ini = STATE.est.nombre.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  document.getElementById('avatar-initials').textContent = ini;
+}
+
+function cerrarPanelProfesor(){
+  STATE.isProfesorAuth = false;
+  mostrarLogin();
+  showToast('Sesión de docente cerrada');
+}
+
+function guardarConfig(){
+  localStorage.setItem(GAS_URL_KEY, document.getElementById('input-gas-url').value.trim());
+  showToast('✅ Configuración Guardada','success');
+}
+
+function mostrarScreen(id){
+  // Seguridad: Impedir mostrar manager sin clave
+  if(id === 'screen-manager' && !STATE.isProfesorAuth){
+    solicitarAccesoProfesor();
+    return;
+  }
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function mostrarLogin(){ mostrarScreen('screen-login'); }
+function cerrarModal(id){ document.getElementById(id).classList.remove('open'); }
+
+let toastTimer;
+function showToast(msg, type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
