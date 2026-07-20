@@ -30,7 +30,7 @@
   user-select: none;
 }
 
-body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; }
 
 .topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; }
 .topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
@@ -51,7 +51,7 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 .form-select, .form-input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--slate-300); border-radius: 0.6rem; font-size: 0.9rem; background: white; }
 .form-select:focus, .form-input:focus { outline: none; border-color: var(--primary); }
 
-.btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.8rem 1.2rem; border-radius: 0.6rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; border: none; transition: all 0.2s; }
+.btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.8rem 1.2rem; border-radius: 0.6rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; border: none; }
 .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; }
 .btn-outline { background: white; color: var(--slate-600); border: 1.5px solid var(--slate-300); }
 .btn-danger { background: var(--red); color: white; }
@@ -82,12 +82,13 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 .modal-overlay.open { display: flex; }
 .modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 440px; width: 100%; box-shadow: var(--shadow-lg); }
 
-#toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--slate-900); color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 700; z-index: 300; transition: transform 0.25s ease; }
+#toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--slate-900); color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-weight: 700; font-size: 0.85rem; transition: transform 300ms; z-index: 500; }
 #toast.show { transform: translateX(-50%) translateY(0); }
 #toast.error { background: var(--red); }
 #toast.success { background: var(--green); }
 
 .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 400; font-weight: 700; }
+.loading-overlay.hidden { display: none; }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -100,7 +101,7 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 
 <div class="topbar">
   <div class="topbar-brand">
-    <img src="IMAGENSANJOSE.png" alt="Logo" onerror="this.style.display='none'">
+    <img src="./IMAGENSANJOSE.png" alt="Logo" onerror="this.style.display='none'">
     <div>
       <div class="topbar-title">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
       <div class="topbar-subtitle">Plataforma Digital Saber 11</div>
@@ -203,10 +204,10 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec';
 
-// Nombres exactos de archivos localizados en el directorio
+// ✅ NOMBRES EXACTOS DE ARCHIVOS - SIN MAYÚSCULAS EN "SESIÓN"
 const PDF_FILES = {
-  S1: '2026-2-SESIÓN-1-compressed.pdf',
-  S2: '2026-2-SESIÓN-2-compressed.pdf'
+  S1: '2026-2-sesion-1-compressed.pdf',
+  S2: '2026-2-sesion-2-compressed.pdf'
 };
 
 const ESTRUCTURA_SESIONES = {
@@ -249,7 +250,7 @@ async function cargarEstudiantes(){
     }
   } catch(e) { console.error(e); }
   finally {
-    document.getElementById('loading-overlay').style.display = 'none';
+    document.getElementById('loading-overlay').classList.add('hidden');
     poblarCursos();
   }
 }
@@ -377,9 +378,10 @@ function iniciarExamen(){
   document.getElementById('display-nombre').textContent = STATE.est.nombre;
   document.getElementById('display-info').textContent = `${STATE.est.grado} · ${sesion === 'S1' ? 'Sesión 1' : 'Sesión 2'}`;
   
-  // Asignación limpia del PDF evitando dobles codificaciones de URI
-  const pdfArchivo = PDF_FILES[sesion] || '2026 2 SESIÓN 1_compressed.pdf';
-  document.getElementById('pdf-frame').src = `./${pdfArchivo}#toolbar=0&navpanes=0`;
+  // ✅ RUTA CORRECTA CON ./ Y ARCHIVO CORRECTO
+  const pdfArchivo = PDF_FILES[sesion];
+  const pdfUrl = `./${pdfArchivo}#toolbar=0&navpanes=0`;
+  document.getElementById('pdf-frame').src = pdfUrl;
 
   renderizarAreas(sesion);
 }
