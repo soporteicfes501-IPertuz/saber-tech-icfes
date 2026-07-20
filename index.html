@@ -70,18 +70,19 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 .pdf-pane iframe { width: 100%; height: 100%; border: none; }
 
 .answers-pane { width: 10%; min-width: 160px; height: 100%; background: white; display: flex; flex-direction: column; border-left: 1px solid var(--slate-300); }
-.exam-info-bar { padding: 0.5rem; background: var(--slate-900); color: white; text-align: center; }
-.timer-badge { background: #334155; color: #38bdf8; font-weight: 900; font-size: 0.8rem; padding: 0.2rem 0.4rem; border-radius: 0.25rem; margin-top: 0.2rem; display: inline-block; }
+.exam-info-bar { padding: 0.4rem; background: var(--slate-900); color: white; text-align: center; }
+.timer-badge { background: #334155; color: #38bdf8; font-weight: 900; font-size: 0.75rem; padding: 0.2rem 0.4rem; border-radius: 0.25rem; margin-top: 0.2rem; display: inline-block; }
 
-.area-tabs-vertical { display: flex; flex-direction: column; padding: 0.4rem; background: #f1f5f9; gap: 0.25rem; border-bottom: 1px solid var(--slate-300); }
-.tab-btn { padding: 0.35rem; border-radius: 0.4rem; font-size: 0.68rem; font-weight: 800; border: 1px solid var(--slate-300); background: white; cursor: pointer; text-align: center; }
+/* HOJA DE RESPUESTAS (Fuentes reducidas ~2pt) */
+.area-tabs-vertical { display: flex; flex-direction: column; padding: 0.3rem; background: #f1f5f9; gap: 0.2rem; border-bottom: 1px solid var(--slate-300); }
+.tab-btn { padding: 0.25rem; border-radius: 0.3rem; font-size: 0.55rem; font-weight: 800; border: 1px solid var(--slate-300); background: white; cursor: pointer; text-align: center; }
 .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-.answers-list { flex: 1; overflow-y: auto; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
-.q-row { display: flex; flex-direction: column; background: var(--bg-main); padding: 0.3rem; border-radius: 0.4rem; border: 1px solid var(--slate-300); text-align: center; }
-.q-num { font-size: 0.75rem; font-weight: 900; margin-bottom: 0.2rem; }
-.q-opts { display: flex; gap: 0.2rem; justify-content: center; }
-.opt-bubble { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--slate-300); background: white; font-size: 0.65rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.answers-list { flex: 1; overflow-y: auto; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.q-row { display: flex; flex-direction: column; background: var(--bg-main); padding: 0.25rem; border-radius: 0.3rem; border: 1px solid var(--slate-300); text-align: center; }
+.q-num { font-size: 0.62rem; font-weight: 900; margin-bottom: 0.15rem; }
+.q-opts { display: flex; gap: 0.15rem; justify-content: center; }
+.opt-bubble { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--slate-300); background: white; font-size: 0.52rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .opt-bubble.selected { background: var(--primary); color: white; border-color: var(--primary); }
 
 /* Modals */
@@ -181,16 +182,16 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 
   <div class="answers-pane">
     <div class="exam-info-bar">
-      <div style="font-weight:900; font-size:0.75rem;" id="display-nombre">Estudiante</div>
-      <div style="font-size:0.65rem; opacity:0.8" id="display-info">Grado</div>
+      <div style="font-weight:900; font-size:0.7rem;" id="display-nombre">Estudiante</div>
+      <div style="font-size:0.6rem; opacity:0.8" id="display-info">Grado</div>
       <div class="timer-badge" id="timer-display">⏱️ --:--</div>
     </div>
 
     <div class="area-tabs-vertical" id="area-tabs"></div>
     <div class="answers-list" id="answers-list"></div>
 
-    <div style="padding:0.4rem; border-top:1px solid var(--slate-300);">
-      <button class="btn btn-danger" style="padding:0.5rem; font-size:0.75rem;" onclick="confirmarEntregaModal()">Finalizar Examen</button>
+    <div style="padding:0.3rem; border-top:1px solid var(--slate-300);">
+      <button class="btn btn-danger" style="padding:0.4rem; font-size:0.7rem;" onclick="confirmarEntregaModal()">Finalizar Examen</button>
     </div>
   </div>
 </div>
@@ -281,9 +282,10 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec';
 
+// Nombres de archivos PDF actualizados a formato minúsculas
 const PDF_FILES = {
-  S1: '2026 2 SESIÓN 1_compressed.pdf',
-  S2: '2026 2 SESIÓN 2_compressed.pdf'
+  S1: '2026-2-sesion-1-compressed.pdf',
+  S2: '2026-2-sesion-2-compressed.pdf'
 };
 
 const ESTRUCTURA_SESIONES = {
@@ -461,7 +463,7 @@ function iniciarExamenAhora(){
   document.getElementById('display-nombre').textContent = STATE.est.nombre;
   document.getElementById('display-info').textContent = `${STATE.est.grado} · ${sesion}`;
   
-  const pdfArchivo = PDF_FILES[sesion] || '2026 2 SESIÓN 1_compressed.pdf';
+  const pdfArchivo = PDF_FILES[sesion] || '2026-2-sesion-1-compressed.pdf';
   document.getElementById('pdf-frame').src = `./${pdfArchivo}#toolbar=0&navpanes=0`;
 
   renderizarAreas(sesion);
@@ -590,7 +592,6 @@ function finalizarExamen(){
   document.getElementById('modal-report').classList.add('open');
 }
 
-/* TEACHER PANEL FUNCTIONS (SECURE BACKEND VERIFICATION) */
 function abrirModalDocente(){
   document.getElementById('teacher-pass-input').value = '';
   document.getElementById('teacher-auth-step').style.display = 'block';
