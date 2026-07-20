@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SABER TECH · I.E.D. San José de Sitionuevo</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root {
-  --primary: #3b82f6;
+  --primary: #2563eb;
   --primary-dark: #1d4ed8;
   --bg-main: #f8fafc;
   --slate-900: #0f172a;
@@ -16,145 +15,194 @@
   --slate-300: #cbd5e1;
   --green: #10b981;
   --red: #ef4444;
-  --shadow-lg: 0 25px 50px -12px rgba(15,23,42,0.15);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   --radius: 1rem;
 }
 
 *, *::before, *::after { 
   box-sizing: border-box; 
-  margin: 0; 
-  padding: 0;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  margin: 0; padding: 0;
   user-select: none;
 }
 
-body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
+/* Topbar */
 .topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; }
-.topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
-.topbar-brand img { height: 40px; width: auto; object-fit: contain; }
-.topbar-title { font-size: 1rem; font-weight: 900; color: var(--slate-900); }
-.topbar-subtitle { font-size: 0.7rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
+.topbar-brand { display: flex; align-items: center; gap: 0.75rem; text-align: center; margin: 0 auto; }
+.topbar-brand img { height: 42px; width: auto; object-fit: contain; }
+.topbar-title { font-size: 1.1rem; font-weight: 900; color: var(--slate-900); letter-spacing: -0.02em; }
+.topbar-subtitle { font-size: 0.72rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
+.btn-teacher { position: absolute; right: 1.5rem; background: var(--slate-100); border: 1px solid var(--slate-300); padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
 
+/* Layout Screens */
 .screen { display: none; flex: 1; height: calc(100vh - 60px); }
 .screen.active { display: flex; }
 
-#screen-login { display: none; align-items: center; justify-content: center; padding: 2rem 1rem; background: radial-gradient(circle at top, #eff6ff 0%, #f8fafc 100%); width: 100%; }
-#screen-login.active { display: flex; }
-.login-container { width: 100%; max-width: 480px; }
-.card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 2rem; border: 1px solid rgba(226, 232, 240, 0.8); }
+/* Enhanced Login Screen */
+#screen-login { align-items: center; justify-content: center; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
+.login-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 2.5rem; width: 100%; max-width: 460px; text-align: center; border: 1px solid white; }
+.login-header { margin-bottom: 1.5rem; }
+.login-header h2 { font-size: 1.5rem; font-weight: 900; color: var(--slate-900); }
+.login-header p { font-size: 0.85rem; color: var(--slate-600); margin-top: 0.25rem; }
+.protocol-tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 0.3rem 0.8rem; border-radius: 1rem; font-weight: 800; font-size: 0.75rem; margin-top: 0.5rem; }
 
-.form-group { margin-bottom: 1rem; }
-.form-label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--slate-600); margin-bottom: 0.3rem; }
+.form-group { margin-bottom: 1.1rem; text-align: left; }
+.form-label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--slate-600); margin-bottom: 0.35rem; }
 .form-select, .form-input { width: 100%; padding: 0.75rem 1rem; border: 1.5px solid var(--slate-300); border-radius: 0.6rem; font-size: 0.9rem; background: white; }
-.form-select:focus, .form-input:focus { outline: none; border-color: var(--primary); }
 
-.btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.8rem 1.2rem; border-radius: 0.6rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; border: none; }
+.btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.85rem; border-radius: 0.6rem; font-size: 0.9rem; font-weight: 800; cursor: pointer; border: none; }
 .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; }
 .btn-outline { background: white; color: var(--slate-600); border: 1.5px solid var(--slate-300); }
 .btn-danger { background: var(--red); color: white; }
 
-#screen-answers { display: none; width: 100%; height: calc(100vh - 60px); flex-direction: row; }
-#screen-answers.active { display: flex; }
+/* Welcome Screen */
+#screen-welcome { align-items: center; justify-content: center; background: var(--bg-main); padding: 2rem; }
+.welcome-card { background: white; border-radius: var(--radius); padding: 2.5rem; max-width: 650px; width: 100%; box-shadow: var(--shadow-lg); }
+.welcome-card h2 { font-size: 1.6rem; font-weight: 900; color: var(--slate-900); margin-bottom: 1rem; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; background: #f1f5f9; padding: 1rem; border-radius: 0.75rem; }
+.info-item { font-size: 0.85rem; font-weight: 600; color: var(--slate-700); }
+.info-item span { display: block; font-weight: 900; font-size: 1.1rem; color: var(--primary); }
 
-.pdf-pane { width: 75%; height: 100%; background: #525659; border-right: 2px solid var(--slate-300); }
+/* Main Exam Screen (90% / 10% Layout) */
+#screen-answers { width: 100%; height: calc(100vh - 60px); flex-direction: row; }
+.pdf-pane { width: 90%; height: 100%; background: #525659; }
 .pdf-pane iframe { width: 100%; height: 100%; border: none; }
 
-.answers-pane { width: 25%; height: 100%; background: white; display: flex; flex-direction: column; }
-.exam-info-bar { padding: 0.75rem; background: var(--slate-900); color: white; border-bottom: 1px solid var(--slate-300); }
-.warning-badge { background: var(--red); color: white; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 0.25rem; display: inline-block; margin-top: 0.25rem; }
+.answers-pane { width: 10%; min-width: 160px; height: 100%; background: white; display: flex; flex-direction: column; border-left: 1px solid var(--slate-300); }
+.exam-info-bar { padding: 0.5rem; background: var(--slate-900); color: white; text-align: center; }
+.timer-badge { background: #334155; color: #38bdf8; font-weight: 900; font-size: 0.8rem; padding: 0.2rem 0.4rem; border-radius: 0.25rem; margin-top: 0.2rem; display: inline-block; }
 
-.area-tabs-vertical { display: flex; overflow-x: auto; padding: 0.5rem; background: #f1f5f9; border-bottom: 1px solid var(--slate-300); gap: 0.25rem; }
-.tab-btn { padding: 0.4rem 0.6rem; border-radius: 0.4rem; font-size: 0.75rem; font-weight: 700; border: 1px solid var(--slate-300); background: white; cursor: pointer; white-space: nowrap; }
+.area-tabs-vertical { display: flex; flex-direction: column; padding: 0.4rem; background: #f1f5f9; gap: 0.25rem; border-bottom: 1px solid var(--slate-300); }
+.tab-btn { padding: 0.35rem; border-radius: 0.4rem; font-size: 0.68rem; font-weight: 800; border: 1px solid var(--slate-300); background: white; cursor: pointer; text-align: center; }
 .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-.answers-list { flex: 1; overflow-y: auto; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
-
-.q-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 0.4rem 0.6rem; border-radius: 0.5rem; border: 1px solid var(--slate-300); }
-.q-num { font-size: 0.8rem; font-weight: 800; color: var(--slate-800); width: 45px; }
-.q-opts { display: flex; gap: 0.3rem; flex: 1; justify-content: flex-end; }
-.opt-bubble { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--slate-300); background: white; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.answers-list { flex: 1; overflow-y: auto; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.q-row { display: flex; flex-direction: column; background: var(--bg-main); padding: 0.3rem; border-radius: 0.4rem; border: 1px solid var(--slate-300); text-align: center; }
+.q-num { font-size: 0.75rem; font-weight: 900; margin-bottom: 0.2rem; }
+.q-opts { display: flex; gap: 0.2rem; justify-content: center; }
+.opt-bubble { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--slate-300); background: white; font-size: 0.65rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .opt-bubble.selected { background: var(--primary); color: white; border-color: var(--primary); }
 
+/* Modals */
 .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
 .modal-overlay.open { display: flex; }
 .modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 440px; width: 100%; box-shadow: var(--shadow-lg); }
 
-#toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--slate-900); color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-weight: 700; font-size: 0.85rem; transition: transform 300ms; z-index: 500; }
+#toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--slate-900); color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 700; z-index: 300; transition: transform 0.25s ease; }
 #toast.show { transform: translateX(-50%) translateY(0); }
 #toast.error { background: var(--red); }
 #toast.success { background: var(--green); }
-
 .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 400; font-weight: 700; }
-.loading-overlay.hidden { display: none; }
 </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div class="loading-overlay" id="loading-overlay">
-  <p>Cargando datos del sistema evaluativo…</p>
+  <p>Cargando Plataforma SABER TECH…</p>
 </div>
 
 <div id="toast"></div>
 
 <div class="topbar">
   <div class="topbar-brand">
-    <img src="./IMAGENSANJOSE.png" alt="Logo" onerror="this.style.display='none'">
+    <img src="IMAGENSANJOSE.png" alt="Logo" onerror="this.style.display='none'">
     <div>
       <div class="topbar-title">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
       <div class="topbar-subtitle">Plataforma Digital Saber 11</div>
     </div>
   </div>
+  <button class="btn-teacher" onclick="abrirModalDocente()">⚙️ Panel Docente</button>
 </div>
 
+<!-- 1. LOGIN SCREEN -->
 <div id="screen-login" class="screen active">
-  <div class="login-container">
-    <div class="card">
-      <div class="form-group">
-        <label class="form-label">Protocolo de Entrenamiento</label>
-        <select class="form-select" id="select-protocolo" onchange="validarFormLogin()">
-          <option value="">Seleccionar protocolo…</option>
-        </select>
-      </div>
+  <div class="login-card">
+    <div class="login-header">
+      <h2>Entrenamiento Saber 11</h2>
+      <p>Selecciona tu curso e identifícate para ingresar</p>
+      <div class="protocol-tag" id="label-protocolo-activo">Cargando protocolo…</div>
+    </div>
 
-      <div class="form-group">
-        <label class="form-label">Grado / Curso</label>
-        <select class="form-select" id="select-curso" onchange="filtrarEstudiantesPorCurso()">
-          <option value="">Seleccionar grado…</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label class="form-label">Grado / Curso</label>
+      <select class="form-select" id="select-curso" onchange="filtrarEstudiantesPorCurso()">
+        <option value="">Seleccionar grado…</option>
+      </select>
+    </div>
 
-      <div class="form-group">
-        <label class="form-label">Estudiante</label>
-        <select class="form-select" id="select-estudiante" onchange="validarFormLogin()" disabled>
-          <option value="">Primero selecciona tu grado…</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label class="form-label">Estudiante</label>
+      <select class="form-select" id="select-estudiante" onchange="validarFormLogin()" disabled>
+        <option value="">Primero selecciona tu grado…</option>
+      </select>
+    </div>
 
-      <div class="form-group">
-        <label class="form-label">Sesión a Responder</label>
-        <select class="form-select" id="select-sesion" onchange="validarFormLogin()">
-          <option value="S1">Sesión 1 (Mañana)</option>
-          <option value="S2">Sesión 2 (Tarde)</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label class="form-label">Sesión a Responder</label>
+      <select class="form-select" id="select-sesion" onchange="validarFormLogin()">
+        <option value="S1">Sesión 1 (Mañana - 122 Preguntas)</option>
+        <option value="S2">Sesión 2 (Tarde - 134 Preguntas)</option>
+      </select>
+    </div>
 
-      <button class="btn btn-primary" id="btn-iniciar" onclick="solicitarAccesoEstudiante()" disabled>
-        Comenzar Examen →
-      </button>
+    <button class="btn btn-primary" id="btn-iniciar" onclick="solicitarAccesoEstudiante()" disabled>
+      Continuar →
+    </button>
+  </div>
+</div>
+
+<!-- 2. WELCOME & INSTRUCTIONS SCREEN -->
+<div id="screen-welcome" class="screen">
+  <div class="welcome-card">
+    <h2>Instrucciones del Examen</h2>
+    <p style="color:var(--slate-600); font-size:0.9rem;">Por favor lee atentamente las condiciones de la sesión antes de iniciar:</p>
+    
+    <div class="info-grid">
+      <div class="info-item">Total Preguntas Sesión: <span id="welcome-total-questions">0</span></div>
+      <div class="info-item">Tiempo Disponible: <span id="welcome-total-time">-- min</span></div>
+    </div>
+
+    <div style="font-size:0.85rem; color:var(--slate-700); line-height:1.6; margin-bottom:1.5rem;">
+      <p>📌 <strong>Estructura por áreas:</strong></p>
+      <ul id="welcome-area-list" style="margin-left:1.2rem; margin-top:0.3rem;"></ul>
+      <p style="margin-top:0.8rem;">⚠️ <strong>Seguridad:</strong> No cambies de pestaña ni minimices el navegador. Cada salida quedará registrada en el informe del docente.</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="iniciarExamenAhora()">Comenzar Prueba Ahora</button>
+  </div>
+</div>
+
+<!-- 3. MAIN EXAM SCREEN (90% / 10%) -->
+<div id="screen-answers" class="screen">
+  <div class="pdf-pane">
+    <iframe id="pdf-frame" src="about:blank"></iframe>
+  </div>
+
+  <div class="answers-pane">
+    <div class="exam-info-bar">
+      <div style="font-weight:900; font-size:0.75rem;" id="display-nombre">Estudiante</div>
+      <div style="font-size:0.65rem; opacity:0.8" id="display-info">Grado</div>
+      <div class="timer-badge" id="timer-display">⏱️ --:--</div>
+    </div>
+
+    <div class="area-tabs-vertical" id="area-tabs"></div>
+    <div class="answers-list" id="answers-list"></div>
+
+    <div style="padding:0.4rem; border-top:1px solid var(--slate-300);">
+      <button class="btn btn-danger" style="padding:0.5rem; font-size:0.75rem;" onclick="confirmarEntregaModal()">Finalizar Examen</button>
     </div>
   </div>
 </div>
 
+<!-- AUTH MODAL (STUDENT) -->
 <div class="modal-overlay" id="modal-auth">
   <div class="modal-box">
     <h3 style="margin-bottom:0.5rem;font-weight:900;" id="auth-modal-title">🔐 Autenticación</h3>
     <p style="font-size:0.85rem;color:var(--slate-600);margin-bottom:1rem;" id="auth-modal-body"></p>
     
     <div class="form-group">
-      <label class="form-label" id="auth-label-pass">Contraseña</label>
+      <label class="form-label">Contraseña</label>
       <input type="password" class="form-input" id="auth-input-pass" placeholder="Ingresa tu clave">
     </div>
 
@@ -170,29 +218,58 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
   </div>
 </div>
 
-<div id="screen-answers" class="screen">
-  <div class="pdf-pane">
-    <iframe id="pdf-frame" src="about:blank"></iframe>
-  </div>
-
-  <div class="answers-pane">
-    <div class="exam-info-bar">
-      <div style="font-weight:800;font-size:0.85rem;" id="display-nombre">Estudiante</div>
-      <div style="font-size:0.7rem;opacity:0.8" id="display-info">Grado · Sesión</div>
-      <div id="warning-container" style="display:none;">
-        <span class="warning-badge" id="warning-count">⚠️ Cambios de ventana: 0</span>
+<!-- TEACHER PANEL MODAL (SECURE) -->
+<div class="modal-overlay" id="modal-teacher">
+  <div class="modal-box">
+    <h3 style="margin-bottom:0.5rem;font-weight:900;">⚙️ Panel del Docente</h3>
+    
+    <div id="teacher-auth-step">
+      <div class="form-group">
+        <label class="form-label">Contraseña de Administrador</label>
+        <input type="password" class="form-input" id="teacher-pass-input" placeholder="Clave docente">
       </div>
+      <button class="btn btn-primary" onclick="verificarDocente()">Acceder</button>
     </div>
 
-    <div class="area-tabs-vertical" id="area-tabs"></div>
-    <div class="answers-list" id="answers-list"></div>
+    <div id="teacher-controls-step" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Protocolo Activo</label>
+        <select class="form-select" id="cfg-protocolo">
+          <option value="Protocolo 01">Protocolo 01</option>
+          <option value="Protocolo 02">Protocolo 02</option>
+          <option value="Protocolo 03">Protocolo 03</option>
+          <option value="Protocolo 04">Protocolo 04</option>
+          <option value="Protocolo 05">Protocolo 05</option>
+        </select>
+      </div>
 
-    <div style="padding:0.75rem; border-top:1px solid var(--slate-300);">
-      <button class="btn btn-danger" onclick="finalizarExamen()">Finalizar Examen</button>
+      <div class="form-group">
+        <label class="form-label">Tiempo por Sesión (Minutos)</label>
+        <input type="number" class="form-input" id="cfg-tiempo" value="270">
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-top:1rem">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-teacher')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarConfiguracionDocente()">Guardar Ajustes</button>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- VALIDATION & CONFIRMATION MODAL -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-box">
+    <h3 style="margin-bottom:0.5rem;font-weight:900;">⚠️ Confirmar Envío</h3>
+    <div id="confirm-stats-body" style="font-size:0.9rem; margin:1rem 0; line-height:1.6; background:#f8fafc; padding:1rem; border-radius:0.5rem; border:1px solid var(--slate-300);"></div>
+    <p style="font-weight:800; color:var(--red); font-size:0.85rem; margin-bottom:1.2rem;">¿Está seguro que quiere enviar? Al enviar no podrá modificar las respuestas.</p>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="btn btn-outline" onclick="cerrarModal('modal-confirm')">Seguir Respondiendo</button>
+      <button class="btn btn-danger" onclick="finalizarExamen()">Sí, Enviar Examen</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
 <div class="modal-overlay" id="modal-report">
   <div class="modal-box">
     <h3 style="margin-bottom:0.5rem;font-weight:900;">📋 Resumen de Entrega</h3>
@@ -204,10 +281,9 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Ro
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec';
 
-// ✅ NOMBRES EXACTOS DE ARCHIVOS - SIN MAYÚSCULAS EN "SESIÓN"
 const PDF_FILES = {
-  S1: '2026-2-sesion-1-compressed.pdf',
-  S2: '2026-2-sesion-2-compressed.pdf'
+  S1: '2026 2 SESIÓN 1_compressed.pdf',
+  S2: '2026 2 SESIÓN 2_compressed.pdf'
 };
 
 const ESTRUCTURA_SESIONES = {
@@ -231,11 +307,13 @@ let STATE = {
   claves: {}, 
   respuestas: {},
   warnings: 0,
-  examActive: false
+  examActive: false,
+  config: { protocoloActivo: 'Protocolo 01', tiempoSesion: 270 },
+  timerInterval: null,
+  timeRemaining: 0
 };
 
 window.addEventListener('DOMContentLoaded', async () => {
-  poblarProtocolos();
   await cargarEstudiantes();
   initAntiCheating();
 });
@@ -244,23 +322,16 @@ async function cargarEstudiantes(){
   try {
     const r = await fetch(GAS_URL + '?action=getInit');
     const data = await r.json();
-    if(data.success && data.estudiantes){
-      STATE.estudiantes = data.estudiantes;
+    if(data.success){
+      STATE.estudiantes = data.estudiantes || [];
       STATE.claves = data.claves || {};
+      if(data.config) STATE.config = data.config;
     }
   } catch(e) { console.error(e); }
   finally {
-    document.getElementById('loading-overlay').classList.add('hidden');
+    document.getElementById('loading-overlay').style.display = 'none';
+    document.getElementById('label-protocolo-activo').textContent = STATE.config.protocoloActivo;
     poblarCursos();
-  }
-}
-
-function poblarProtocolos(){
-  const sel = document.getElementById('select-protocolo');
-  sel.innerHTML = '<option value="">Seleccionar protocolo…</option>';
-  for(let i=1; i<=5; i++){
-    const num = i.toString().padStart(2,'0');
-    sel.appendChild(new Option(`Protocolo ${num} · 2026`, `Protocolo ${num}`));
   }
 }
 
@@ -299,11 +370,10 @@ function filtrarEstudiantesPorCurso(){
 }
 
 function validarFormLogin(){
-  const p = document.getElementById('select-protocolo').value;
   const c = document.getElementById('select-curso').value;
   const e = document.getElementById('select-estudiante').value;
   const s = document.getElementById('select-sesion').value;
-  document.getElementById('btn-iniciar').disabled = !(p && c && e !== "" && s);
+  document.getElementById('btn-iniciar').disabled = !(c && e !== "" && s);
 }
 
 function solicitarAccesoEstudiante(){
@@ -338,8 +408,6 @@ async function ejecutarAutenticacion(){
     if(pass.length < 4){ showToast('La clave debe tener mínimo 4 caracteres', 'error'); return; }
     if(pass !== confirm){ showToast('Las contraseñas NO coinciden', 'error'); return; }
 
-    showToast('Guardando contraseña...');
-    
     try {
       const resp = await fetch(GAS_URL, {
         method: 'POST',
@@ -347,43 +415,72 @@ async function ejecutarAutenticacion(){
         body: JSON.stringify({ action: 'registrarClave', estudiante: nombre, clave: pass })
       });
       const data = await resp.json();
-      
       if(data.success) {
         STATE.claves[nombre] = pass;
-        showToast('Clave registrada en hoja ESTUDIANTES', 'success');
         cerrarModal('modal-auth');
-        iniciarExamen();
-      } else {
-        showToast(data.error || 'Error al registrar clave', 'error');
+        mostrarPantallaBienvenida();
       }
-    } catch(e) {
-      showToast('Error de conexión al servidor', 'error');
-    }
+    } catch(e) { showToast('Error al guardar clave', 'error'); }
   } else {
     if(claveGuardada === pass){
       cerrarModal('modal-auth');
-      iniciarExamen();
+      mostrarPantallaBienvenida();
     } else {
       showToast('Contraseña incorrecta', 'error');
     }
   }
 }
 
-function iniciarExamen(){
+function mostrarPantallaBienvenida(){
+  mostrarScreen('screen-welcome');
+  const sesion = document.getElementById('select-sesion').value;
+  const areas = ESTRUCTURA_SESIONES[sesion];
+  
+  let totalPreguntas = 0;
+  const listEl = document.getElementById('welcome-area-list');
+  listEl.innerHTML = '';
+  
+  areas.forEach(a => {
+    totalPreguntas += a.preg;
+    const li = document.createElement('li');
+    li.textContent = `${a.area}: ${a.preg} preguntas`;
+    listEl.appendChild(li);
+  });
+
+  document.getElementById('welcome-total-questions').textContent = totalPreguntas;
+  document.getElementById('welcome-total-time').textContent = `${STATE.config.tiempoSesion || 270} min`;
+}
+
+function iniciarExamenAhora(){
   mostrarScreen('screen-answers');
   STATE.examActive = true;
   STATE.warnings = 0;
+  STATE.respuestas = {};
   
   const sesion = document.getElementById('select-sesion').value;
   document.getElementById('display-nombre').textContent = STATE.est.nombre;
-  document.getElementById('display-info').textContent = `${STATE.est.grado} · ${sesion === 'S1' ? 'Sesión 1' : 'Sesión 2'}`;
+  document.getElementById('display-info').textContent = `${STATE.est.grado} · ${sesion}`;
   
-  // ✅ RUTA CORRECTA CON ./ Y ARCHIVO CORRECTO
-  const pdfArchivo = PDF_FILES[sesion];
-  const pdfUrl = `./${pdfArchivo}#toolbar=0&navpanes=0`;
-  document.getElementById('pdf-frame').src = pdfUrl;
+  const pdfArchivo = PDF_FILES[sesion] || '2026 2 SESIÓN 1_compressed.pdf';
+  document.getElementById('pdf-frame').src = `./${pdfArchivo}#toolbar=0&navpanes=0`;
 
   renderizarAreas(sesion);
+  iniciarTemporizador(parseInt(STATE.config.tiempoSesion || 270) * 60);
+}
+
+function iniciarTemporizador(segundos){
+  STATE.timeRemaining = segundos;
+  clearInterval(STATE.timerInterval);
+  STATE.timerInterval = setInterval(() => {
+    STATE.timeRemaining--;
+    const m = Math.floor(STATE.timeRemaining / 60);
+    const s = STATE.timeRemaining % 60;
+    document.getElementById('timer-display').textContent = `⏱️ ${m}:${s < 10 ? '0' : ''}${s}`;
+    if(STATE.timeRemaining <= 0){
+      clearInterval(STATE.timerInterval);
+      finalizarExamen();
+    }
+  }, 1000);
 }
 
 function renderizarAreas(sesionKey){
@@ -434,7 +531,6 @@ async function marcarYGuardarRespuesta(qKey, opcion, el){
   parent.querySelectorAll('.opt-bubble').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
 
-  const protocolo = document.getElementById('select-protocolo').value;
   const sesion = document.getElementById('select-sesion').value;
 
   try {
@@ -445,15 +541,110 @@ async function marcarYGuardarRespuesta(qKey, opcion, el){
         action: 'guardarRespuesta',
         estudiante: STATE.est.nombre,
         grado: STATE.est.grado,
-        protocolo: protocolo,
+        protocolo: STATE.config.protocoloActivo,
         sesion: sesion,
         pregunta: qKey,
         respuesta: opcion
       })
     });
+  } catch(e){}
+}
+
+function obtenerTotalPreguntasSesion(){
+  const sesion = document.getElementById('select-sesion').value;
+  return ESTRUCTURA_SESIONES[sesion].reduce((acc, a) => acc + a.preg, 0);
+}
+
+function confirmarEntregaModal(){
+  const respondidas = Object.keys(STATE.respuestas).length;
+  const total = obtenerTotalPreguntasSesion();
+  const sinResponder = total - respondidas;
+
+  const html = `
+    <p>📝 <strong>Preguntas Respondidas:</strong> ${respondidas}</p>
+    <p>❓ <strong>Sin Responder:</strong> ${sinResponder}</p>
+    <p>📊 <strong>Total Preguntas:</strong> ${total}</p>
+  `;
+
+  document.getElementById('confirm-stats-body').innerHTML = html;
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+function finalizarExamen(){
+  cerrarModal('modal-confirm');
+  clearInterval(STATE.timerInterval);
+  STATE.examActive = false;
+  
+  const respondidas = Object.keys(STATE.respuestas).length;
+  const total = obtenerTotalPreguntasSesion();
+  
+  const html = `
+    <p><strong>Estudiante:</strong> ${STATE.est.nombre}</p>
+    <p><strong>Respuestas Guardadas:</strong> ${respondidas} de ${total}</p>
+    <p style="color:${STATE.warnings > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:800; margin-top:0.5rem;">
+      <strong>Infracciones por ventana:</strong> ${STATE.warnings}
+    </p>
+  `;
+
+  document.getElementById('report-content').innerHTML = html;
+  document.getElementById('modal-report').classList.add('open');
+}
+
+/* TEACHER PANEL FUNCTIONS (SECURE BACKEND VERIFICATION) */
+function abrirModalDocente(){
+  document.getElementById('teacher-pass-input').value = '';
+  document.getElementById('teacher-auth-step').style.display = 'block';
+  document.getElementById('teacher-controls-step').style.display = 'none';
+  document.getElementById('modal-teacher').classList.add('open');
+}
+
+async function verificarDocente(){
+  const p = document.getElementById('teacher-pass-input').value.trim();
+  if(!p) { showToast('Ingresa la contraseña', 'error'); return; }
+
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'verifyTeacherPass', teacherPass: p })
+    });
+    const data = await r.json();
+    
+    if(data.success){
+      document.getElementById('teacher-auth-step').style.display = 'none';
+      document.getElementById('teacher-controls-step').style.display = 'block';
+      document.getElementById('cfg-protocolo').value = STATE.config.protocoloActivo || 'Protocolo 01';
+      document.getElementById('cfg-tiempo').value = STATE.config.tiempoSesion || '270';
+    } else {
+      showToast(data.error || 'Contraseña incorrecta', 'error');
+    }
   } catch(e) {
-    console.error('Error enviando respuesta', e);
+    showToast('Error de conexión con el servidor', 'error');
   }
+}
+
+async function guardarConfiguracionDocente(){
+  const proto = document.getElementById('cfg-protocolo').value;
+  const tiempo = document.getElementById('cfg-tiempo').value;
+  const pass = document.getElementById('teacher-pass-input').value.trim();
+
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'saveConfig', protocolo: proto, tiempo: tiempo, teacherPass: pass })
+    });
+    const data = await r.json();
+    if(data.success){
+      STATE.config.protocoloActivo = proto;
+      STATE.config.tiempoSesion = tiempo;
+      document.getElementById('label-protocolo-activo').textContent = proto;
+      showToast('Configuración guardada correctamente', 'success');
+      cerrarModal('modal-teacher');
+    } else {
+      showToast(data.error || 'Error al guardar', 'error');
+    }
+  } catch(e){ showToast('Error de conexión', 'error'); }
 }
 
 function initAntiCheating(){
@@ -461,26 +652,11 @@ function initAntiCheating(){
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) registrarInfraccion();
   });
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'PrintScreen' || 
-       (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || (e.shiftKey && e.key === 'I')))) {
-      e.preventDefault();
-      showToast('🚫 Acción bloqueada por seguridad', 'error');
-    }
-  });
 }
 
 function registrarInfraccion(){
   if(!STATE.examActive) return;
   STATE.warnings++;
-  
-  const badge = document.getElementById('warning-count');
-  badge.textContent = `⚠️ Cambios de ventana: ${STATE.warnings}`;
-  document.getElementById('warning-container').style.display = 'block';
-
-  showToast(`⚠️ Alerta: Saliste de la prueba (${STATE.warnings}). Se guardará en el informe.`, 'error');
-
   try {
     fetch(GAS_URL, {
       method: 'POST',
@@ -494,26 +670,9 @@ function registrarInfraccion(){
   } catch(e){}
 }
 
-function finalizarExamen(){
-  STATE.examActive = false;
-  const respondidas = Object.keys(STATE.respuestas).length;
-  
-  const html = `
-    <p><strong>Estudiante:</strong> ${STATE.est.nombre}</p>
-    <p><strong>Grado:</strong> ${STATE.est.grado}</p>
-    <p><strong>Respuestas marcadas:</strong> ${respondidas}</p>
-    <p style="color:${STATE.warnings > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:800; margin-top:0.5rem;">
-      <strong>Infracciones por ventana:</strong> ${STATE.warnings}
-    </p>
-  `;
-
-  document.getElementById('report-content').innerHTML = html;
-  document.getElementById('modal-report').classList.add('open');
-}
-
 function cerrarReporteYSalir(){
   cerrarModal('modal-report');
-  mostrarLogin();
+  mostrarScreen('screen-login');
 }
 
 function mostrarScreen(id){
@@ -521,7 +680,6 @@ function mostrarScreen(id){
   document.getElementById(id).classList.add('active');
 }
 
-function mostrarLogin(){ mostrarScreen('screen-login'); }
 function cerrarModal(id){ document.getElementById(id).classList.remove('open'); }
 
 function showToast(msg, type=''){
