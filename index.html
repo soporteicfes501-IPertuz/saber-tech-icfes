@@ -41,6 +41,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 .topbar-subtitle { font-size: 0.7rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
 .topbar-actions { position: absolute; right: 1.5rem; display: flex; gap: 0.5rem; }
 .btn-topbar { background: #f1f5f9; border: 1px solid var(--slate-300); padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+.btn-topbar:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Indicador de red */
 .net-status { font-size: 0.7rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 1rem; display: flex; align-items: center; gap: 0.3rem; position: absolute; left: 1.5rem; }
@@ -174,7 +175,7 @@ th { background: #f1f5f9; font-weight: 800; }
     </div>
   </div>
   <div class="topbar-actions">
-    <button class="btn-topbar" onclick="abrirModalConsultaEstudiante()">📄 Consultar Mi Reporte PDF</button>
+    <button class="btn-topbar" id="btn-topbar-reporte" onclick="abrirModalConsultaEstudiante()" disabled title="Los reportes se habilitarán cuando los resultados estén procesados">📄 Consultar Mi Reporte PDF</button>
     <button class="btn-topbar" onclick="abrirModalDocente()">⚙️ Panel Docente</button>
   </div>
 </div>
@@ -296,7 +297,10 @@ th { background: #f1f5f9; font-weight: 800; }
         <label class="form-label">Contraseña</label>
         <input type="password" class="form-input" id="consulta-pass" placeholder="Tu clave registrada">
       </div>
-      <button class="btn btn-primary" onclick="verificarYGenerarReporteIndividual()">Ver Mi Reporte</button>
+      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-consulta')">Salir</button>
+        <button class="btn btn-primary" onclick="verificarYGenerarReporteIndividual()">Ver Mi Reporte</button>
+      </div>
     </div>
 
     <div id="consulta-result-step" style="display:none;">
@@ -308,7 +312,7 @@ th { background: #f1f5f9; font-weight: 800; }
           <p style="font-size:0.65rem; color:var(--slate-600);" id="rep-pdf-id">ID VERIFICACIÓN: ST-XXXXXX-2026</p>
         </div>
 
-        <div style="display:flex; justify-style:space-around; align-items:center; background:#f1f5f9; padding:0.8rem; border-radius:0.5rem; margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#f1f5f9; padding:0.8rem; border-radius:0.5rem; margin-bottom:1rem;">
           <div style="text-align:center;">
             <span style="font-size:0.7rem; font-weight:800; color:var(--slate-600);">PUNTAJE GLOBAL PROYECTADO</span>
             <div style="font-size:1.8rem; font-weight:900; color:var(--slate-900);" id="rep-pdf-global">0 / 500</div>
@@ -359,17 +363,21 @@ th { background: #f1f5f9; font-weight: 800; }
 <!-- PANEL DOCENTE -->
 <div class="modal-overlay" id="modal-teacher">
   <div class="modal-box">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+    <div style="display:flex; justify-style:space-between; align-items:center; margin-bottom:0.8rem;">
       <h3 style="font-weight:900;">⚙️ Panel de Control Docente</h3>
       <button id="btn-logout-teacher" class="btn btn-outline" style="width:auto; padding:0.3rem 0.6rem; font-size:0.75rem; display:none; background:#fee2e2; color:#b91c1c; border-color:#fca5a5;" onclick="cerrarSesionDocente()">🚪 Cerrar Sesión Docente</button>
     </div>
     
+    <!-- LOGIN PANEL DOCENTE CON DOS BOTONES (SALIR Y ACCEDER) -->
     <div id="teacher-auth-step">
       <div class="form-group">
         <label class="form-label">Contraseña de Administrador</label>
-        <input type="password" class="form-input" id="teacher-pass-input" placeholder="Clave docente">
+        <input type="password" class="form-input" id="teacher-pass-input" placeholder="Clave docente" onkeydown="if(event.key==='Enter') verificarDocente()">
       </div>
-      <button class="btn btn-primary" onclick="verificarDocente()">Acceder al Panel</button>
+      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-teacher')">Salir / Cancelar</button>
+        <button class="btn btn-primary" onclick="verificarDocente()">Acceder al Panel</button>
+      </div>
     </div>
 
     <div id="teacher-controls-step" style="display:none;">
@@ -392,7 +400,7 @@ th { background: #f1f5f9; font-weight: 800; }
           </select>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom: 1rem;">
           <div class="form-group">
             <label class="form-label">Horas por Sesión</label>
             <input type="number" class="form-input" id="cfg-horas" value="4" min="0" max="8">
@@ -400,6 +408,17 @@ th { background: #f1f5f9; font-weight: 800; }
           <div class="form-group">
             <label class="form-label">Minutos Adicionales</label>
             <input type="number" class="form-input" id="cfg-minutos" value="30" min="0" max="59">
+          </div>
+        </div>
+
+        <!-- Habilitación manual de botón de descarga de reporte -->
+        <div class="form-group" style="background: #f1f5f9; padding: 0.8rem; border-radius: 0.5rem; border: 1px solid var(--slate-300);">
+          <label class="form-label" style="margin-bottom:0.2rem;">Habilitación de Reportes Estudiantiles</label>
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.3rem;">
+            <input type="checkbox" id="cfg-habilitar-reportes" style="width: 18px; height: 18px; cursor: pointer;">
+            <label for="cfg-habilitar-reportes" style="font-size: 0.8rem; font-weight:700; cursor: pointer;">
+              Permitir a los estudiantes descargar / consultar su informe PDF
+            </label>
           </div>
         </div>
       </div>
@@ -413,7 +432,7 @@ th { background: #f1f5f9; font-weight: 800; }
           <div><label class="form-label">Ciencias 1</label><input type="number" class="form-input" id="cfg-s1-cn" value="29"></div>
         </div>
 
-        <p style="font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">SESIÓN 2</p>
+        <p style="font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">SESIÓN 2 (Llega exactamente hasta P124)</p>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:0.5rem;">
           <div><label class="form-label">Sociales 2</label><input type="number" class="form-input" id="cfg-s2-soc" value="25"></div>
           <div><label class="form-label">Matemáticas 2</label><input type="number" class="form-input" id="cfg-s2-mat" value="25"></div>
@@ -510,11 +529,12 @@ let STATE = {
   warnings: 0,
   examActive: false,
   warningTimeout: null,
-  lastWarningTime: 0, // Antirrebote para evitar duplicación de infracciones
+  lastWarningTime: 0,
   config: {
     protocoloActivo: 'Protocolo 01',
     horas: 4,
     minutos: 30,
+    habilitarReportes: false,
     s1: { mat: 25, lec: 41, soc: 25, cn: 29 },
     s2: { soc: 25, mat: 25, cn: 29, ing: 45 },
     inglesMap: {}
@@ -568,7 +588,6 @@ function recuperarRespuestasLocales() {
   STATE.respuestas = { ...localData };
 }
 
-// Envío unificado por LOTE (Batch Sink) para evitar race conditions
 async function sincronizarLoteProcesado() {
   if (!navigator.onLine || STATE.isSyncing || !STATE.est) return false;
   
@@ -679,6 +698,7 @@ async function cargarEstudiantes(){
   finally {
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('label-protocolo-activo').textContent = STATE.config.protocoloActivo;
+    actualizarEstadoBotonReporte();
     poblarCursos();
     poblarListaConsultaEstudiantes();
   }
@@ -688,14 +708,30 @@ function parseConfigFromBackend(cfg){
   if(cfg.protocoloActivo) STATE.config.protocoloActivo = cfg.protocoloActivo;
   if(cfg.horas) STATE.config.horas = parseInt(cfg.horas);
   if(cfg.minutos) STATE.config.minutos = parseInt(cfg.minutos);
+  if(cfg.habilitarReportes !== undefined) STATE.config.habilitarReportes = (cfg.habilitarReportes === true || cfg.habilitarReportes === 'true');
   if(cfg.s1) STATE.config.s1 = typeof cfg.s1 === 'string' ? JSON.parse(cfg.s1) : cfg.s1;
   if(cfg.s2) STATE.config.s2 = typeof cfg.s2 === 'string' ? JSON.parse(cfg.s2) : cfg.s2;
   if(cfg.inglesMap) STATE.config.inglesMap = typeof cfg.inglesMap === 'string' ? JSON.parse(cfg.inglesMap) : cfg.inglesMap;
 }
 
+function actualizarEstadoBotonReporte(){
+  const btn = document.getElementById('btn-topbar-reporte');
+  if(STATE.config.habilitarReportes) {
+    btn.disabled = false;
+    btn.title = "Consultar y descargar reporte PDF";
+  } else {
+    btn.disabled = true;
+    btn.title = "Los reportes estarán disponibles una vez sean habilitados por el docente";
+  }
+}
+
+/*
+  Ajuste de Estructura de Sesiones:
+  - Sesión 2: Sociales(25) + Mat(25) + Ciencias(29) + Inglés(45) = 124 preguntas en total.
+*/
 function obtenerEstructuraSesiones(){
-  const s2InglesCount = STATE.config.s2.ing;
-  const s2OffsetIngles = STATE.config.s2.soc + STATE.config.s2.mat + STATE.config.s2.cn;
+  const s2InglesCount = STATE.config.s2.ing; // Default: 45
+  const s2OffsetIngles = STATE.config.s2.soc + STATE.config.s2.mat + STATE.config.s2.cn; // 25 + 25 + 29 = 79
 
   return {
     S1: [
@@ -901,7 +937,6 @@ function cargarPreguntasArea(itemArea){
     const pregGlobalNum = itemArea.offset + i;
     const qKey = `P${pregGlobalNum}`;
     
-    // Label visible en el panel
     const labelTexto = itemArea.isIngles ? `P${pregGlobalNum} (${i})` : `P${pregGlobalNum}`;
 
     let opciones = itemArea.opts || ['A','B','C','D'];
@@ -956,10 +991,8 @@ function confirmarEntregaModal(){
 async function finalizarExamen(){
   cerrarModal('modal-confirm');
   
-  // Mostrar pantalla bloqueante de sincronización
   document.getElementById('sync-modal').classList.add('active');
 
-  // Intentar sincronizar por lote hasta obtener confirmación
   let exitoNube = false;
   let reintentos = 0;
 
@@ -969,11 +1002,10 @@ async function finalizarExamen(){
     }
     if (!exitoNube) {
       reintentos++;
-      await new Promise(r => setTimeout(r, 1500)); // Esperar latencia
+      await new Promise(r => setTimeout(r, 1500));
     }
   }
 
-  // Generar automáticamente el archivo TXT local por seguridad
   generarYDescargarTXTRespaldo();
 
   document.getElementById('sync-modal').classList.remove('active');
@@ -1001,13 +1033,12 @@ async function finalizarExamen(){
 }
 
 /* ======================================================
-   SISTEMA DE CONTROL DE INFRACCIONES (CON ANTIRREBOTE)
+   SISTEMA DE CONTROL DE INFRACCIONES
 ====================================================== */
 
 function triggerWarning(msg) {
   if(!STATE.examActive) return;
 
-  // Mecanismo Antirrebote (Debounce) de 2.5s para evitar duplicación de eventos simultáneos
   const now = Date.now();
   if (now - STATE.lastWarningTime < 2500) {
     return;
@@ -1033,22 +1064,22 @@ function initAntiCheating(){
     if (document.hidden) triggerWarning("Ventana minimizada o fuera de foco.");
   });
 
-  // 2. Detección de intento de impresión de pantalla o menú de navegador
+  // 2. Detección de intento de impresión de pantalla
   window.addEventListener('beforeprint', () => {
     triggerWarning("Intento de impresión del examen detectado");
   });
 
-  // 3. Detección estricta de selección por arrastre de texto (Excluye clics normales)
+  // 3. SIN WARNING POR CLIC SENCILLO: Se activa ÚNICAMENTE si se selecciona y arrastra un fragmento largo de texto
   document.addEventListener('selectionchange', () => {
     if(!STATE.examActive) return;
     const selection = window.getSelection();
     if (selection && selection.toString().trim().length > 5) {
       triggerWarning("Intento de selección y arrastre de texto no permitido");
-      selection.removeAllRanges(); // Limpiar la selección de inmediato
+      selection.removeAllRanges();
     }
   });
 
-  // 4. Teclas de acceso rápido prohibidas
+  // 4. Teclas prohibidas (PrintScreen, Ctrl+C, Ctrl+V, F12)
   document.addEventListener('keydown', (e) => {
     if(!STATE.examActive) return;
 
@@ -1083,6 +1114,10 @@ function initAntiCheating(){
 ====================================================== */
 
 function abrirModalConsultaEstudiante(){
+  if(!STATE.config.habilitarReportes) {
+    showToast('La descarga de reportes no ha sido habilitada por el docente', 'error');
+    return;
+  }
   document.getElementById('consulta-pass').value = '';
   document.getElementById('consulta-login-step').style.display = 'block';
   document.getElementById('consulta-result-step').style.display = 'none';
@@ -1210,6 +1245,7 @@ function poblarCamposPanelDocente(){
   document.getElementById('cfg-protocolo').value = STATE.config.protocoloActivo || 'Protocolo 01';
   document.getElementById('cfg-horas').value = STATE.config.horas || 4;
   document.getElementById('cfg-minutos').value = STATE.config.minutos || 30;
+  document.getElementById('cfg-habilitar-reportes').checked = STATE.config.habilitarReportes || false;
   
   document.getElementById('cfg-s1-mat').value = STATE.config.s1.mat;
   document.getElementById('cfg-s1-lec').value = STATE.config.s1.lec;
@@ -1229,7 +1265,7 @@ function renderizarConfiguracionIngles(){
   const soc = parseInt(document.getElementById('cfg-s2-soc').value) || 25;
   const mat = parseInt(document.getElementById('cfg-s2-mat').value) || 25;
   const cn = parseInt(document.getElementById('cfg-s2-cn').value) || 29;
-  const startOffset = soc + mat + cn;
+  const startOffset = soc + mat + cn; // Offset: 79
 
   const grid = document.getElementById('ingles-questions-grid');
   grid.innerHTML = '';
@@ -1327,6 +1363,7 @@ async function guardarConfiguracionDocente(){
     protocoloActivo: document.getElementById('cfg-protocolo').value,
     horas: parseInt(document.getElementById('cfg-horas').value) || 0,
     minutos: parseInt(document.getElementById('cfg-minutos').value) || 0,
+    habilitarReportes: document.getElementById('cfg-habilitar-reportes').checked,
     s1: {
       mat: parseInt(document.getElementById('cfg-s1-mat').value) || 0,
       lec: parseInt(document.getElementById('cfg-s1-lec').value) || 0,
@@ -1352,6 +1389,7 @@ async function guardarConfiguracionDocente(){
     if(data.success){
       STATE.config = newSettings;
       document.getElementById('label-protocolo-activo').textContent = newSettings.protocoloActivo;
+      actualizarEstadoBotonReporte();
       showToast('Configuración guardada en la nube', 'success');
       cerrarModal('modal-teacher');
     } else {
