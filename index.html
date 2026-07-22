@@ -12,7 +12,9 @@
       --card-bg: #ffffff;
       --text: #1f2937;
       --danger: #e02424;
+      --danger-hover: #9b1c1c;
       --success: #0e9f6e;
+      --secondary: #6b7280;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -29,6 +31,11 @@
     button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; transition: background 0.2s; }
     button:hover { background-color: var(--primary-hover); }
     button:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+    .btn-danger { background-color: var(--danger); }
+    .btn-danger:hover { background-color: var(--danger-hover); }
+    .btn-secondary { background-color: var(--secondary); }
+    .btn-secondary:hover { background-color: #4b5563; }
 
     .hidden { display: none; }
     .alert { padding: 12px; border-radius: 5px; margin-bottom: 15px; font-weight: 500; }
@@ -77,7 +84,12 @@
         <option value="2">Sesión 2</option>
       </select>
     </div>
-    <button onclick="iniciarExamen()">Ingresar al Examen</button>
+    
+    <div style="display: flex; gap: 10px;">
+      <button onclick="iniciarExamen()">Ingresar al Examen</button>
+      <button onclick="regresarAlInicio()" class="btn-secondary" style="width: 30%;">Limpiar</button>
+    </div>
+
     <div style="margin-top: 15px; text-align: right;">
       <a href="#" onclick="abrirModalDocente()" style="color: var(--primary); font-size: 14px;">Acceso Docente</a>
     </div>
@@ -86,8 +98,12 @@
   <!-- PANTALLA 2: EVALUACIÓN / HOJA DE RESPUESTAS -->
   <div id="view-examen" class="card hidden">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-      <h2 id="estudiante-info">Estudiante</h2>
-      <span id="badge-advertencias" style="color: var(--danger); font-weight:bold;">Infracciones: 0</span>
+      <div>
+        <h2 id="estudiante-info" style="margin-bottom:0;">Estudiante</h2>
+        <span id="badge-advertencias" style="color: var(--danger); font-weight:bold; font-size: 14px;">Infracciones: 0</span>
+      </div>
+      <!-- BOTÓN SALIR PARA ESTUDIANTES -->
+      <button onclick="salirExamenEstudiante()" class="btn-danger" style="width: auto; padding: 8px 18px;">Salir del Examen</button>
     </div>
 
     <div id="preguntas-container">
@@ -101,7 +117,8 @@
   <div id="view-docente" class="card hidden">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h2>Panel del Docente</h2>
-      <button onclick="cerrarSesionDocente()" style="width: auto; padding: 5px 15px; background: #6b7280;">Salir</button>
+      <!-- BOTÓN SALIR PARA DOCENTES -->
+      <button onclick="regresarAlInicio()" class="btn-secondary" style="width: auto; padding: 8px 18px;">Salir</button>
     </div>
     <div style="margin-top: 20px;">
       <button onclick="cargarReportes()" style="margin-bottom: 10px;">Actualizar Reportes</button>
@@ -121,12 +138,11 @@
       <input type="password" id="input-teacher-pass" placeholder="Contraseña Docente">
     </div>
     <button onclick="loginDocente()">Entrar</button>
-    <button onclick="cerrarModalDocente()" style="background:#6b7280; margin-top:5px;">Cancelar</button>
+    <button onclick="cerrarModalDocente()" class="btn-secondary" style="margin-top:8px;">Cancelar / Salir</button>
   </div>
 </div>
 
 <script>
-  // URL del Web App de Google Apps Script
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec'; 
 
   let globalData = {
@@ -140,13 +156,11 @@
     respuestasGuardadas: {}
   };
 
-  // Inicialización
   window.onload = function() {
     cargarDatosIniciales();
     configurarControlInfracciones();
   };
 
-  // 1. CARGAR DATOS DE INICIALIZACIÓN (JSONP para evitar problemas CORS)
   function cargarDatosIniciales() {
     mostrarAlerta('Cargando datos del sistema...', 'info');
     const script = document.createElement('script');
@@ -175,7 +189,6 @@
     }
   }
 
-  // 2. REGISTRO DE RESPUESTAS AL INSTANTE EN GOOGLE SHEETS
   function guardarRespuestaIndividual(numPregunta, opcion) {
     globalData.respuestasGuardadas[`P${numPregunta}`] = opcion;
 
@@ -189,7 +202,6 @@
       respuesta: opcion
     };
 
-    // Uso del método fetch con mode 'no-cors' y 'text/plain'
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -202,7 +214,6 @@
     });
   }
 
-  // 3. REGISTRO DE INFRACCIONES
   function registrarInfraccionBackend() {
     globalData.advertencias++;
     document.getElementById('badge-advertencias').textContent = `Infracciones: ${globalData.advertencias}`;
@@ -231,7 +242,6 @@
     });
   }
 
-  // 4. LÓGICA INTERFAZ Y NAVEGACIÓN
   function iniciarExamen() {
     const select = document.getElementById('select-estudiante');
     const estNombre = select.value;
@@ -242,7 +252,6 @@
       return;
     }
 
-    // Verificar Clave si existe
     if (globalData.claves[estNombre] && globalData.claves[estNombre] !== claveIngresada) {
       alert('Clave de acceso incorrecta para este estudiante.');
       return;
@@ -256,7 +265,7 @@
 
     document.getElementById('estudiante-info').textContent = `${globalData.estudianteActual} (${globalData.gradoActual})`;
     
-    generarHojaRespuestas(30); // Cambiar número total de preguntas si aplica (ej. 30, 100, 140)
+    generarHojaRespuestas(30);
     
     document.getElementById('view-login').classList.add('hidden');
     document.getElementById('view-examen').classList.remove('hidden');
@@ -283,9 +292,8 @@
         btn.className = 'opt-btn';
         btn.textContent = opcion;
         btn.onclick = function() {
-          // Remover seleccionado previo en esta fila
-          optGrid.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
-          btn.classList.addClass ? btn.classList.add('selected') : btn.className = 'opt-btn selected';
+          optGrid.querySelectorAll('.opt-btn').forEach(b => b.className = 'opt-btn');
+          btn.className = 'opt-btn selected';
           
           guardarRespuestaIndividual(i, opcion);
         };
@@ -299,22 +307,49 @@
 
   function finalizarExamen() {
     if (confirm('¿Estás seguro de que deseas finalizar el examen?')) {
-      alert('Respuestas registradas exitosamente. Puedes cerrar la ventana.');
-      location.reload();
+      alert('Respuestas registradas exitosamente.');
+      regresarAlInicio();
     }
   }
 
-  // 5. ACCESO Y PANEL DOCENTE
+  // --- NAVEGACIÓN Y BOTONES DE SALIDA ---
+  function salirExamenEstudiante() {
+    if (confirm('¿Estás seguro de que deseas salir del examen? Se conservarán las respuestas marcadas hasta ahora.')) {
+      regresarAlInicio();
+    }
+  }
+
+  function regresarAlInicio() {
+    // Resetear variables
+    globalData.estudianteActual = null;
+    globalData.gradoActual = '';
+    globalData.advertencias = 0;
+    globalData.respuestasGuardadas = {};
+
+    // Resetear inputs
+    document.getElementById('input-clave').value = '';
+    document.getElementById('input-teacher-pass').value = '';
+    document.getElementById('select-estudiante').value = '';
+    
+    // Ocultar vistas secundarias / modales
+    document.getElementById('view-examen').classList.add('hidden');
+    document.getElementById('view-docente').classList.add('hidden');
+    cerrarModalDocente();
+    
+    // Mostrar pantalla de inicio
+    document.getElementById('view-login').classList.remove('hidden');
+  }
+
   function abrirModalDocente() { document.getElementById('modal-docente').classList.remove('hidden'); }
-  function cerrarModalDocente() { document.getElementById('modal-docente').classList.add('hidden'); }
+  function cerrarModalDocente() { 
+    document.getElementById('input-teacher-pass').value = '';
+    document.getElementById('modal-docente').classList.add('hidden'); 
+  }
 
   function loginDocente() {
     const pass = document.getElementById('input-teacher-pass').value;
     mostrarAlerta('Verificando contraseña...', 'info');
 
-    const payload = { action: 'verifyTeacherPass', teacherPass: pass };
-
-    // Para obtener respuesta de validación se usa JSONP en la llamada doGet de verificación
     const script = document.createElement('script');
     script.src = `${SCRIPT_URL}?action=getReportes&callback=procesarLoginDocente`; 
     document.body.appendChild(script);
@@ -322,7 +357,7 @@
 
   function procesarLoginDocente(resp) {
     const pass = document.getElementById('input-teacher-pass').value;
-    if (pass === 'saber2026') { // O la clave configurada en el Apps Script
+    if (pass === 'saber2026') {
       cerrarModalDocente();
       ocultarAlerta();
       document.getElementById('view-login').classList.add('hidden');
@@ -350,12 +385,6 @@
     }
   }
 
-  function cerrarSesionDocente() {
-    document.getElementById('view-docente').classList.add('hidden');
-    document.getElementById('view-login').classList.remove('hidden');
-  }
-
-  // UTILIDADES DE ALERTA
   function mostrarAlerta(msg, type) {
     const el = document.getElementById('status-alert');
     el.className = `alert alert-${type === 'danger' ? 'danger' : 'success'}`;
