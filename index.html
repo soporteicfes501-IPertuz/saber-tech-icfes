@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SABER TECH · I.E.D. San José de Sitionuevo</title>
+<!-- Librería para generación de PDF en el cliente -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
   --primary: #2563eb;
@@ -30,36 +32,25 @@
 
 body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-@media print {
-  body { display: none !important; }
-}
+@media print { body { display: none !important; } }
 
-.topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+.topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; position: relative; }
 .topbar-brand { display: flex; align-items: center; gap: 0.75rem; margin: 0 auto; }
 .topbar-brand img { height: 40px; width: auto; object-fit: contain; }
 .topbar-title { font-size: 1.1rem; font-weight: 900; color: var(--slate-900); }
 .topbar-subtitle { font-size: 0.7rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
-.btn-teacher { position: absolute; right: 1.5rem; background: #f1f5f9; border: 1px solid var(--slate-300); padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+.topbar-actions { position: absolute; right: 1.5rem; display: flex; gap: 0.5rem; }
+.btn-topbar { background: #f1f5f9; border: 1px solid var(--slate-300); padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
 
 /* Indicador de red */
-.net-status {
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 0.25rem 0.6rem;
-  border-radius: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  position: absolute;
-  left: 1.5rem;
-}
+.net-status { font-size: 0.7rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 1rem; display: flex; align-items: center; gap: 0.3rem; position: absolute; left: 1.5rem; }
 .net-status.online { background: #dcfce7; color: #15803d; }
 .net-status.offline { background: #fee2e2; color: #b91c1c; }
 
 .screen { display: none; flex: 1; height: calc(100vh - 60px); }
 .screen.active { display: flex; }
 
-#screen-login { align-items: center; justify-content: center; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); }
+#screen-login { align-items: center; justify-content: center; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); flex-direction: column; }
 .login-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 2.5rem; width: 100%; max-width: 460px; text-align: center; }
 .protocol-tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 0.3rem 0.8rem; border-radius: 1rem; font-weight: 800; font-size: 0.75rem; margin-top: 0.5rem; }
 
@@ -91,37 +82,23 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-m
 .answers-list { flex: 1; overflow-y: auto; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.25rem; }
 
 .q-row-line { display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 0.25rem 0.4rem; border-radius: 0.3rem; border: 1px solid var(--slate-300); }
-.q-num-inline { font-size: 0.65rem; font-weight: 900; min-width: 28px; }
+.q-num-inline { font-size: 0.65rem; font-weight: 900; min-width: 50px; }
 .q-opts-inline { display: flex; gap: 0.15rem; align-items: center; flex-wrap: wrap; }
 .opt-bubble { width: 19px; height: 19px; border-radius: 50%; border: 1px solid var(--slate-300); background: white; font-size: 0.55rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .opt-bubble.selected { background: var(--primary); color: white; border-color: var(--primary); }
 
-#center-warning-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(5px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
+#center-warning-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999; }
 #center-warning-modal.active { display: flex; animation: popup 0.2s ease-out; }
-.warning-card {
-  background: white;
-  border-top: 6px solid var(--red);
-  border-radius: var(--radius);
-  padding: 2rem;
-  max-width: 420px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.3);
-}
+.warning-card { background: white; border-top: 6px solid var(--red); border-radius: var(--radius); padding: 2rem; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.3); }
 
-@keyframes popup {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
+/* Modal de Sincronización Bloqueante */
+#sync-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10000; }
+#sync-modal.active { display: flex; }
+.sync-card { background: white; border-radius: var(--radius); padding: 2.5rem; max-width: 450px; width: 90%; text-align: center; box-shadow: var(--shadow-lg); }
+.spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+@keyframes popup { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
 .modal-overlay.open { display: flex; }
@@ -141,16 +118,27 @@ table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 
 th, td { border: 1px solid var(--slate-300); padding: 0.4rem; text-align: left; }
 th { background: #f1f5f9; font-weight: 800; }
 
-.ingles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.5rem; max-height: 300px; overflow-y: auto; padding: 0.5rem; background: #f8fafc; border: 1px solid var(--slate-300); border-radius: 0.5rem; }
+.ingles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; max-height: 300px; overflow-y: auto; padding: 0.5rem; background: #f8fafc; border: 1px solid var(--slate-300); border-radius: 0.5rem; }
 .ingles-item { background: white; padding: 0.4rem; border-radius: 0.3rem; border: 1px solid var(--slate-300); display: flex; flex-direction: column; gap: 0.2rem; }
+
+#pdf-report-template { background: white; padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--slate-300); margin-top: 1rem; }
+.report-header { text-align: center; border-bottom: 2px solid var(--slate-900); padding-bottom: 0.8rem; margin-bottom: 1rem; }
+.report-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin: 1rem 0; text-align: center; }
+.score-card { border: 1px solid var(--slate-300); padding: 0.6rem; border-radius: 0.5rem; background: #f8fafc; }
+.score-card-title { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--slate-600); }
+.score-card-value { font-size: 1.2rem; font-weight: 900; color: var(--slate-900); margin: 0.2rem 0; }
+.score-badge { display: inline-block; font-size: 0.6rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 0.3rem; }
+.score-badge.reforzar { background: #fee2e2; color: #b91c1c; }
+.score-badge.bueno { background: #dcfce7; color: #15803d; }
 </style>
 </head>
-<body oncontextmenu="triggerWarning('Acción no permitida: Clic derecho bloqueado'); return false;">
+<body>
 
 <div class="loading-overlay" id="loading-overlay">
   <p>Cargando Plataforma SABER TECH…</p>
 </div>
 
+<!-- Modal de Infracciones -->
 <div id="center-warning-modal">
   <div class="warning-card">
     <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚠️</div>
@@ -159,6 +147,18 @@ th { background: #f1f5f9; font-weight: 800; }
     <div style="margin-top: 1rem; font-size: 0.7rem; color: var(--slate-600); font-weight: 800;">
       Esta infracción ha sido registrada en el sistema.
     </div>
+  </div>
+</div>
+
+<!-- Modal Bloqueante: Esperando Sincronización de Respuestas -->
+<div id="sync-modal">
+  <div class="sync-card">
+    <div class="spinner" id="sync-spinner"></div>
+    <h3 style="font-weight: 900; color: var(--slate-900); margin-bottom: 0.5rem;" id="sync-title">Esperando Sincronización de Respuestas...</h3>
+    <p style="font-size: 0.85rem; color: var(--slate-600); line-height: 1.4;" id="sync-msg">
+      Guardando el paquete completo de respuestas en la nube para evitar pérdida de celdas. 
+      <strong>Por favor, no cierre esta página ni intente salir.</strong>
+    </p>
   </div>
 </div>
 
@@ -173,7 +173,10 @@ th { background: #f1f5f9; font-weight: 800; }
       <div class="topbar-subtitle">Plataforma Digital Saber 11</div>
     </div>
   </div>
-  <button class="btn-teacher" onclick="abrirModalDocente()">⚙️ Panel Docente</button>
+  <div class="topbar-actions">
+    <button class="btn-topbar" onclick="abrirModalConsultaEstudiante()">📄 Consultar Mi Reporte PDF</button>
+    <button class="btn-topbar" onclick="abrirModalDocente()">⚙️ Panel Docente</button>
+  </div>
 </div>
 
 <!-- 1. LOGIN -->
@@ -277,10 +280,89 @@ th { background: #f1f5f9; font-weight: 800; }
   </div>
 </div>
 
+<!-- PANEL CONSULTA INDIVIDUAL / DESCARGA REPORTE PDF -->
+<div class="modal-overlay" id="modal-consulta">
+  <div class="modal-box" style="max-width:650px;">
+    <h3 style="margin-bottom:0.8rem;font-weight:900;">📄 Consultar / Descargar Reporte Individual PDF</h3>
+    
+    <div id="consulta-login-step">
+      <div class="form-group">
+        <label class="form-label">Nombre de Estudiante</label>
+        <select class="form-select" id="consulta-select-est">
+          <option value="">Selecciona tu nombre...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" class="form-input" id="consulta-pass" placeholder="Tu clave registrada">
+      </div>
+      <button class="btn btn-primary" onclick="verificarYGenerarReporteIndividual()">Ver Mi Reporte</button>
+    </div>
+
+    <div id="consulta-result-step" style="display:none;">
+      <div id="contenedor-reporte-pdf">
+        <div class="report-header">
+          <h2 style="font-size:1.2rem; font-weight:900;">SABER TECH · INFRAESTRUCTURA EDUCATIVA</h2>
+          <p style="font-size:0.8rem; font-weight:700; color:var(--primary);">INFORME DE DESEMPEÑO SABER 11</p>
+          <p style="font-size:0.75rem; margin-top:0.3rem;" id="rep-pdf-estudiante">Estudiante: --</p>
+          <p style="font-size:0.65rem; color:var(--slate-600);" id="rep-pdf-id">ID VERIFICACIÓN: ST-XXXXXX-2026</p>
+        </div>
+
+        <div style="display:flex; justify-style:space-around; align-items:center; background:#f1f5f9; padding:0.8rem; border-radius:0.5rem; margin-bottom:1rem;">
+          <div style="text-align:center;">
+            <span style="font-size:0.7rem; font-weight:800; color:var(--slate-600);">PUNTAJE GLOBAL PROYECTADO</span>
+            <div style="font-size:1.8rem; font-weight:900; color:var(--slate-900);" id="rep-pdf-global">0 / 500</div>
+          </div>
+          <div style="text-align:center;">
+            <span style="font-size:0.7rem; font-weight:800; color:var(--slate-600);">PERCENTIL NACIONAL</span>
+            <div style="font-size:1.8rem; font-weight:900; color:var(--primary);" id="rep-pdf-percentil">0%</div>
+          </div>
+        </div>
+
+        <div class="report-grid">
+          <div class="score-card">
+            <div class="score-card-title">Matemáticas</div>
+            <div class="score-card-value" id="rep-val-mat">0</div>
+            <span class="score-badge reforzar" id="rep-badge-mat">REFORZAR</span>
+          </div>
+          <div class="score-card">
+            <div class="score-card-title">Lectura Crítica</div>
+            <div class="score-card-value" id="rep-val-lec">0</div>
+            <span class="score-badge reforzar" id="rep-badge-lec">REFORZAR</span>
+          </div>
+          <div class="score-card">
+            <div class="score-card-title">C. Naturales</div>
+            <div class="score-card-value" id="rep-val-cn">0</div>
+            <span class="score-badge reforzar" id="rep-badge-cn">REFORZAR</span>
+          </div>
+          <div class="score-card">
+            <div class="score-card-title">Sociales</div>
+            <div class="score-card-value" id="rep-val-soc">0</div>
+            <span class="score-badge reforzar" id="rep-badge-soc">REFORZAR</span>
+          </div>
+          <div class="score-card">
+            <div class="score-card-title">Inglés</div>
+            <div class="score-card-value" id="rep-val-ing">0</div>
+            <span class="score-badge reforzar" id="rep-badge-ing">REFORZAR</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-consulta')">Cerrar</button>
+        <button class="btn btn-success" onclick="descargarReportePDFActual()">📄 Descargar PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PANEL DOCENTE -->
 <div class="modal-overlay" id="modal-teacher">
   <div class="modal-box">
-    <h3 style="margin-bottom:0.8rem;font-weight:900;">⚙️ Panel de Control Docente</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+      <h3 style="font-weight:900;">⚙️ Panel de Control Docente</h3>
+      <button id="btn-logout-teacher" class="btn btn-outline" style="width:auto; padding:0.3rem 0.6rem; font-size:0.75rem; display:none; background:#fee2e2; color:#b91c1c; border-color:#fca5a5;" onclick="cerrarSesionDocente()">🚪 Cerrar Sesión Docente</button>
+    </div>
     
     <div id="teacher-auth-step">
       <div class="form-group">
@@ -298,7 +380,6 @@ th { background: #f1f5f9; font-weight: 800; }
         <div class="t-tab" onclick="switchTeacherTab('tab-reportes', this); cargarReportesDocente();">Informes & Infracciones</div>
       </div>
 
-      <!-- TAB 1: GENERAL -->
       <div id="tab-general" class="t-content">
         <div class="form-group">
           <label class="form-label">Protocolo Activo</label>
@@ -323,9 +404,8 @@ th { background: #f1f5f9; font-weight: 800; }
         </div>
       </div>
 
-      <!-- TAB 2: PREGUNTAS POR ÁREA -->
       <div id="tab-preguntas" class="t-content" style="display:none;">
-        <p style="font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">SESIÓN 1 (Orden: Matemáticas 1 → Lectura Crítica → Sociales 1 → Ciencias 1)</p>
+        <p style="font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">SESIÓN 1</p>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:0.5rem; margin-bottom:1rem;">
           <div><label class="form-label">Matemáticas 1</label><input type="number" class="form-input" id="cfg-s1-mat" value="25"></div>
           <div><label class="form-label">Lectura Crítica</label><input type="number" class="form-input" id="cfg-s1-lec" value="41"></div>
@@ -333,16 +413,15 @@ th { background: #f1f5f9; font-weight: 800; }
           <div><label class="form-label">Ciencias 1</label><input type="number" class="form-input" id="cfg-s1-cn" value="29"></div>
         </div>
 
-        <p style="font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">SESIÓN 2 (Orden: Sociales 2 → Matemáticas 2 → Ciencias 2 → Inglés)</p>
+        <p style="font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">SESIÓN 2</p>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:0.5rem;">
           <div><label class="form-label">Sociales 2</label><input type="number" class="form-input" id="cfg-s2-soc" value="25"></div>
           <div><label class="form-label">Matemáticas 2</label><input type="number" class="form-input" id="cfg-s2-mat" value="25"></div>
           <div><label class="form-label">Ciencias 2</label><input type="number" class="form-input" id="cfg-s2-cn" value="29"></div>
-          <div><label class="form-label">Inglés</label><input type="number" class="form-input" id="cfg-s2-ing" value="55" onchange="renderizarConfiguracionIngles()"></div>
+          <div><label class="form-label">Inglés</label><input type="number" class="form-input" id="cfg-s2-ing" value="45" onchange="renderizarConfiguracionIngles()"></div>
         </div>
       </div>
 
-      <!-- TAB 3: INGLÉS -->
       <div id="tab-ingles" class="t-content" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
           <p style="font-size:0.75rem; font-weight:800;">Formato por Pregunta de Inglés:</p>
@@ -360,11 +439,10 @@ th { background: #f1f5f9; font-weight: 800; }
         <div class="ingles-grid" id="ingles-questions-grid"></div>
       </div>
 
-      <!-- TAB 4: REPORTES Y DESCARGAS -->
       <div id="tab-reportes" class="t-content" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
           <p style="font-size:0.8rem; font-weight:800;">Respuestas Registradas</p>
-          <button class="btn btn-success" style="width:auto; padding:0.3rem 0.6rem; font-size:0.75rem;" onclick="descargarInformeExcel()">📊 Descargar Informe CSV</button>
+          <button class="btn btn-success" style="width:auto; padding:0.3rem 0.6rem; font-size:0.75rem;" onclick="descargarInformeExcel()">📊 Descargar Informe General CSV</button>
         </div>
         
         <div style="max-height:130px; overflow-y:auto; margin-bottom:1rem;">
@@ -374,7 +452,7 @@ th { background: #f1f5f9; font-weight: 800; }
           </table>
         </div>
 
-        <p style="font-size:0.8rem; font-weight:800; color:var(--red);">Monitoreo de Infracciones (Intentos de Copia / Capturas / Cambios)</p>
+        <p style="font-size:0.8rem; font-weight:800; color:var(--red);">Monitoreo de Infracciones</p>
         <div style="max-height:130px; overflow-y:auto;">
           <table id="tbl-infracciones">
             <thead><tr><th>Fecha</th><th>Estudiante</th><th>Infracciones</th></tr></thead>
@@ -396,7 +474,7 @@ th { background: #f1f5f9; font-weight: 800; }
   <div class="modal-box" style="max-width:420px;">
     <h3 style="margin-bottom:0.5rem;font-weight:900;">⚠️ Confirmar Envío</h3>
     <div id="confirm-stats-body" style="font-size:0.85rem; margin:1rem 0; background:#f8fafc; padding:0.8rem; border-radius:0.5rem; border:1px solid var(--slate-300);"></div>
-    <p style="font-weight:800; color:var(--red); font-size:0.8rem; margin-bottom:1rem;">¿Desea enviar las respuestas? Esta acción no se puede deshacer.</p>
+    <p style="font-weight:800; color:var(--red); font-size:0.8rem; margin-bottom:1rem;">¿Desea enviar las respuestas? Se descargará automáticamente una copia en .txt de sus respuestas.</p>
     <div style="display:flex; gap:0.5rem;">
       <button class="btn btn-outline" onclick="cerrarModal('modal-confirm')">Seguir Respondiendo</button>
       <button class="btn btn-danger" id="btn-final-send" onclick="finalizarExamen()">Sí, Enviar Examen</button>
@@ -404,12 +482,15 @@ th { background: #f1f5f9; font-weight: 800; }
   </div>
 </div>
 
-<!-- REPORT MODAL -->
+<!-- REPORT MODAL (RESUMEN POST-ENTREGA) -->
 <div class="modal-overlay" id="modal-report">
-  <div class="modal-box" style="max-width:420px;">
-    <h3 style="margin-bottom:0.5rem;font-weight:900;">📋 Resumen de Entrega</h3>
+  <div class="modal-box" style="max-width:480px;">
+    <h3 style="margin-bottom:0.5rem;font-weight:900;">📋 Resumen de Entrega Exitosa</h3>
     <div id="report-content" style="font-size:0.85rem; line-height:1.5; margin-bottom:1rem;"></div>
-    <button class="btn btn-primary" onclick="cerrarReporteYSalir()">Aceptar y Salir</button>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="btn btn-primary" onclick="cerrarReporteYSalir()">Aceptar y Salir</button>
+      <button class="btn btn-success" onclick="descargarRespaldoTXTManualmente()">📄 Descargar TXT Manual</button>
+    </div>
   </div>
 </div>
 
@@ -429,12 +510,13 @@ let STATE = {
   warnings: 0,
   examActive: false,
   warningTimeout: null,
+  lastWarningTime: 0, // Antirrebote para evitar duplicación de infracciones
   config: {
     protocoloActivo: 'Protocolo 01',
     horas: 4,
     minutos: 30,
     s1: { mat: 25, lec: 41, soc: 25, cn: 29 },
-    s2: { soc: 25, mat: 25, cn: 29, ing: 55 },
+    s2: { soc: 25, mat: 25, cn: 29, ing: 45 },
     inglesMap: {}
   },
   timerInterval: null,
@@ -446,92 +528,33 @@ window.addEventListener('DOMContentLoaded', async () => {
   initNetworkMonitoring();
   await cargarEstudiantes();
   initAntiCheating();
-  iniciarSincronizadorBackground();
 });
 
 /* ======================================================
-   CAPA DE RESILENCIA LOCAL Y MONITOREO DE CONEXIÓN
+   CAPA BATCH SINK & RESILENCIA SIN CELDAS EN BLANCO
 ====================================================== */
 
 function initNetworkMonitoring() {
   const badge = document.getElementById('net-status-badge');
-  
   function updateStatus() {
     if (navigator.onLine) {
       badge.textContent = '● En línea';
       badge.className = 'net-status online';
-      sincronizarColaPendiente();
+      sincronizarLoteProcesado();
     } else {
       badge.textContent = '▲ Sin Conexión (Modo Offline)';
       badge.className = 'net-status offline';
     }
   }
-
   window.addEventListener('online', updateStatus);
   window.addEventListener('offline', updateStatus);
   updateStatus();
 }
 
-function getSyncQueue() {
-  try {
-    return JSON.parse(localStorage.getItem('SABER_TECH_QUEUE') || '[]');
-  } catch(e) {
-    return [];
-  }
-}
-
-function saveSyncQueue(queue) {
-  localStorage.setItem('SABER_TECH_QUEUE', JSON.stringify(queue));
-}
-
-function queuePayload(payload) {
-  const queue = getSyncQueue();
-  queue.push({ id: Date.now() + Math.random(), payload });
-  saveSyncQueue(queue);
-  sincronizarColaPendiente();
-}
-
-async function sincronizarColaPendiente() {
-  if (!navigator.onLine || STATE.isSyncing) return;
-  const queue = getSyncQueue();
-  if (queue.length === 0) return;
-
-  STATE.isSyncing = true;
-  const remaining = [];
-
-  for (const item of queue) {
-    try {
-      const resp = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(item.payload)
-      });
-      const data = await resp.json();
-      if (!data || !data.success) {
-        remaining.push(item);
-      }
-    } catch(e) {
-      remaining.push(item);
-    }
-  }
-
-  saveSyncQueue(remaining);
-  STATE.isSyncing = false;
-
-  if (remaining.length === 0) {
-    showToast('Respuestas sincronizadas con el servidor', 'success');
-  }
-}
-
-function iniciarSincronizadorBackground() {
-  setInterval(() => {
-    if (navigator.onLine) sincronizarColaPendiente();
-  }, 10000);
-}
-
 function guardarRespuestaLocal(qKey, opcion) {
   if (!STATE.est) return;
-  const storageKey = `EXAM_${STATE.est.nombre}_${document.getElementById('select-sesion').value}`;
+  const sesion = document.getElementById('select-sesion').value;
+  const storageKey = `EXAM_${STATE.est.nombre}_${sesion}`;
   const localData = JSON.parse(localStorage.getItem(storageKey) || '{}');
   localData[qKey] = opcion;
   localStorage.setItem(storageKey, JSON.stringify(localData));
@@ -539,13 +562,106 @@ function guardarRespuestaLocal(qKey, opcion) {
 
 function recuperarRespuestasLocales() {
   if (!STATE.est) return;
-  const storageKey = `EXAM_${STATE.est.nombre}_${document.getElementById('select-sesion').value}`;
+  const sesion = document.getElementById('select-sesion').value;
+  const storageKey = `EXAM_${STATE.est.nombre}_${sesion}`;
   const localData = JSON.parse(localStorage.getItem(storageKey) || '{}');
   STATE.respuestas = { ...localData };
 }
 
+// Envío unificado por LOTE (Batch Sink) para evitar race conditions
+async function sincronizarLoteProcesado() {
+  if (!navigator.onLine || STATE.isSyncing || !STATE.est) return false;
+  
+  const sesion = document.getElementById('select-sesion').value;
+  const storageKey = `EXAM_${STATE.est.nombre}_${sesion}`;
+  const respuestasLocales = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+  if (Object.keys(respuestasLocales).length === 0) return true;
+
+  STATE.isSyncing = true;
+
+  const payload = {
+    action: 'guardarLoteRespuestas',
+    estudiante: STATE.est.nombre,
+    grado: STATE.est.grado,
+    protocolo: STATE.config.protocoloActivo,
+    sesion: sesion,
+    respuestas: respuestasLocales,
+    advertencias: STATE.warnings
+  };
+
+  try {
+    const resp = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json();
+    if (data && data.success) {
+      STATE.isSyncing = false;
+      return true;
+    }
+  } catch(e) {
+    console.error("Error en batch sync:", e);
+  }
+  
+  STATE.isSyncing = false;
+  return false;
+}
+
 /* ======================================================
-   CÓDIGO BASE DEL SISTEMA
+   GENERACIÓN DE ARCHIVO TXT MANUAL DE RESPALDO
+====================================================== */
+
+function generarYDescargarTXTRespaldo() {
+  if (!STATE.est) return;
+
+  const sesion = document.getElementById('select-sesion').value;
+  const fecha = new Date().toLocaleString('es-CO');
+  
+  let txtContent = `====================================================\n`;
+  txtContent += `      SABER TECH - RESPALDO DE SEGURIDAD MANUAL      \n`;
+  txtContent += `====================================================\n\n`;
+  txtContent += `ESTUDIANTE:  ${STATE.est.nombre}\n`;
+  txtContent += `CURSO:       ${STATE.est.grado}\n`;
+  txtContent += `SESIÓN:      ${sesion}\n`;
+  txtContent += `PROTOCOLO:   ${STATE.config.protocoloActivo}\n`;
+  txtContent += `FECHA:       ${fecha}\n`;
+  txtContent += `INFRACCIONES:${STATE.warnings}\n`;
+  txtContent += `----------------------------------------------------\n`;
+  txtContent += `DESGLOSE DE RESPUESTAS REGISTRADAS:\n`;
+  txtContent += `----------------------------------------------------\n\n`;
+
+  const total = obtenerTotalPreguntasSesion();
+  let respondidas = 0;
+
+  for (let i = 1; i <= total; i++) {
+    const qKey = `P${i}`;
+    const ans = STATE.respuestas[qKey] || 'SIN RESPONDER';
+    if (STATE.respuestas[qKey]) respondidas++;
+    txtContent += `${qKey.padEnd(6, ' ')} : ${ans}\n`;
+  }
+
+  txtContent += `\n----------------------------------------------------\n`;
+  txtContent += `TOTAL RESPONDIDAS: ${respondidas} de ${total}\n`;
+  txtContent += `====================================================\n`;
+
+  const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `Respaldo_SABER11_${STATE.est.nombre.replace(/\s+/g, '_')}_${sesion}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function descargarRespaldoTXTManualmente() {
+  generarYDescargarTXTRespaldo();
+}
+
+/* ======================================================
+   CÓDIGO PRINCIPAL PLATAFORMA
 ====================================================== */
 
 async function cargarEstudiantes(){
@@ -564,6 +680,7 @@ async function cargarEstudiantes(){
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('label-protocolo-activo').textContent = STATE.config.protocoloActivo;
     poblarCursos();
+    poblarListaConsultaEstudiantes();
   }
 }
 
@@ -609,6 +726,14 @@ function poblarCursos(){
   selCurso.innerHTML = '<option value="">Seleccionar grado…</option>';
   Object.keys(byCurso).sort().forEach(g => {
     selCurso.appendChild(new Option(`Grado ${g}`, g));
+  });
+}
+
+function poblarListaConsultaEstudiantes(){
+  const sel = document.getElementById('consulta-select-est');
+  sel.innerHTML = '<option value="">Selecciona tu nombre...</option>';
+  STATE.estudiantes.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
+    sel.appendChild(new Option(`${e.nombre} (${e.grado})`, e.nombre));
   });
 }
 
@@ -776,6 +901,9 @@ function cargarPreguntasArea(itemArea){
     const pregGlobalNum = itemArea.offset + i;
     const qKey = `P${pregGlobalNum}`;
     
+    // Label visible en el panel
+    const labelTexto = itemArea.isIngles ? `P${pregGlobalNum} (${i})` : `P${pregGlobalNum}`;
+
     let opciones = itemArea.opts || ['A','B','C','D'];
     if(itemArea.isIngles) {
       opciones = STATE.config.inglesMap[qKey] || ['A','B','C','D'];
@@ -784,7 +912,7 @@ function cargarPreguntasArea(itemArea){
     const row = document.createElement('div');
     row.className = 'q-row-line';
     row.innerHTML = `
-      <div class="q-num-inline">P${pregGlobalNum}</div>
+      <div class="q-num-inline">${labelTexto}</div>
       <div class="q-opts-inline">
         ${opciones.map(opt => `
           <div class="opt-bubble ${STATE.respuestas[qKey] === opt ? 'selected' : ''}" 
@@ -796,27 +924,13 @@ function cargarPreguntasArea(itemArea){
   }
 }
 
-async function marcarYGuardarRespuesta(qKey, opcion, el){
+function marcarYGuardarRespuesta(qKey, opcion, el){
   STATE.respuestas[qKey] = opcion;
   const parent = el.parentElement;
   parent.querySelectorAll('.opt-bubble').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
 
   guardarRespuestaLocal(qKey, opcion);
-
-  const sesion = document.getElementById('select-sesion').value;
-  
-  const payload = {
-    action: 'guardarRespuesta',
-    estudiante: STATE.est.nombre,
-    grado: STATE.est.grado,
-    protocolo: STATE.config.protocoloActivo,
-    sesion: sesion,
-    pregunta: qKey,
-    respuesta: opcion
-  };
-
-  queuePayload(payload);
 }
 
 function obtenerTotalPreguntasSesion(){
@@ -828,18 +942,11 @@ function confirmarEntregaModal(){
   const respondidas = Object.keys(STATE.respuestas).length;
   const total = obtenerTotalPreguntasSesion();
   const sinResponder = total - respondidas;
-  const enCola = getSyncQueue().length;
-
-  let warningOffline = '';
-  if (enCola > 0 || !navigator.onLine) {
-    warningOffline = `<p style="color:var(--yellow); font-weight:800; margin-top:0.5rem;">⚠️ Hay ${enCola} registros pendientes de sincronización por falta de conexión. Se intentará enviar de inmediato.</p>`;
-  }
 
   const html = `
     <p>📝 <strong>Preguntas Respondidas:</strong> ${respondidas}</p>
     <p>❓ <strong>Sin Responder:</strong> ${sinResponder}</p>
     <p>📊 <strong>Total Preguntas:</strong> ${total}</p>
-    ${warningOffline}
   `;
 
   document.getElementById('confirm-stats-body').innerHTML = html;
@@ -847,60 +954,71 @@ function confirmarEntregaModal(){
 }
 
 async function finalizarExamen(){
-  const btnFinal = document.getElementById('btn-final-send');
-  btnFinal.disabled = true;
-  btnFinal.textContent = 'Verificando red...';
+  cerrarModal('modal-confirm');
+  
+  // Mostrar pantalla bloqueante de sincronización
+  document.getElementById('sync-modal').classList.add('active');
 
-  if (navigator.onLine) {
-    await sincronizarColaPendiente();
+  // Intentar sincronizar por lote hasta obtener confirmación
+  let exitoNube = false;
+  let reintentos = 0;
+
+  while(!exitoNube && reintentos < 5) {
+    if (navigator.onLine) {
+      exitoNube = await sincronizarLoteProcesado();
+    }
+    if (!exitoNube) {
+      reintentos++;
+      await new Promise(r => setTimeout(r, 1500)); // Esperar latencia
+    }
   }
 
-  const queueRestante = getSyncQueue().length;
+  // Generar automáticamente el archivo TXT local por seguridad
+  generarYDescargarTXTRespaldo();
 
-  cerrarModal('modal-confirm');
+  document.getElementById('sync-modal').classList.remove('active');
   clearInterval(STATE.timerInterval);
   STATE.examActive = false;
   
   const respondidas = Object.keys(STATE.respuestas).length;
   const total = obtenerTotalPreguntasSesion();
-  
-  let estadoEnvio = '<p style="color:var(--green); font-weight:800; margin-top:0.5rem;">✅ Examen guardado y sincronizado con el servidor.</p>';
-  if (queueRestante > 0) {
-    estadoEnvio = `<p style="color:var(--yellow); font-weight:800; margin-top:0.5rem;">⚠️ Examen guardado LOCALMENTE. Faltan ${queueRestante} paquete(s) por subir. No cierres el navegador hasta recuperar conexión.</p>`;
-  }
+
+  const msgEstado = exitoNube 
+    ? `<p style="color:var(--green); font-weight:800; margin-top:0.8rem;">✅ Examen sincronizado sin pérdidas en Google Sheets y respaldado en archivo TXT.</p>`
+    : `<p style="color:var(--yellow); font-weight:800; margin-top:0.3rem;">⚠️ Falló la conexión con la nube. Se ha descargado un respaldo .TXT en su dispositivo con sus respuestas.</p>`;
 
   const html = `
     <p><strong>Estudiante:</strong> ${STATE.est.nombre}</p>
-    <p><strong>Respuestas Guardadas:</strong> ${respondidas} de ${total}</p>
-    <p style="color:${STATE.warnings > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:800;">
-      <strong>Infracciones Registradas:</strong> ${STATE.warnings}
+    <p><strong>Respuestas Completadas:</strong> ${respondidas} de ${total}</p>
+    <p style="color:${STATE.warnings > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:800; margin-top:0.3rem;">
+      <strong>Infracciones Detectadas:</strong> ${STATE.warnings}
     </p>
-    ${estadoEnvio}
+    ${msgEstado}
   `;
 
   document.getElementById('report-content').innerHTML = html;
   document.getElementById('modal-report').classList.add('open');
-  
-  btnFinal.disabled = false;
-  btnFinal.textContent = 'Sí, Enviar Examen';
 }
+
+/* ======================================================
+   SISTEMA DE CONTROL DE INFRACCIONES (CON ANTIRREBOTE)
+====================================================== */
 
 function triggerWarning(msg) {
   if(!STATE.examActive) return;
+
+  // Mecanismo Antirrebote (Debounce) de 2.5s para evitar duplicación de eventos simultáneos
+  const now = Date.now();
+  if (now - STATE.lastWarningTime < 2500) {
+    return;
+  }
+  STATE.lastWarningTime = now;
 
   STATE.warnings++;
   
   const modal = document.getElementById('center-warning-modal');
   document.getElementById('warning-msg-text').textContent = msg;
   modal.classList.add('active');
-
-  const payload = {
-    action: 'registrarInfraccion',
-    estudiante: STATE.est.nombre,
-    advertencias: STATE.warnings
-  };
-
-  queuePayload(payload);
 
   if(STATE.warningTimeout) clearTimeout(STATE.warningTimeout);
   STATE.warningTimeout = setTimeout(() => {
@@ -909,11 +1027,28 @@ function triggerWarning(msg) {
 }
 
 function initAntiCheating(){
+  // 1. Detección por cambio de pestaña o minimización de ventana
   window.addEventListener('blur', () => triggerWarning("Intento de abandono de pantalla / cambio de pestaña."));
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) triggerWarning("Ventana minimizada o fuera de foco.");
   });
 
+  // 2. Detección de intento de impresión de pantalla o menú de navegador
+  window.addEventListener('beforeprint', () => {
+    triggerWarning("Intento de impresión del examen detectado");
+  });
+
+  // 3. Detección estricta de selección por arrastre de texto (Excluye clics normales)
+  document.addEventListener('selectionchange', () => {
+    if(!STATE.examActive) return;
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim().length > 5) {
+      triggerWarning("Intento de selección y arrastre de texto no permitido");
+      selection.removeAllRanges(); // Limpiar la selección de inmediato
+    }
+  });
+
+  // 4. Teclas de acceso rápido prohibidas
   document.addEventListener('keydown', (e) => {
     if(!STATE.examActive) return;
 
@@ -925,30 +1060,117 @@ function initAntiCheating(){
 
     if (e.ctrlKey || e.metaKey) {
       const k = e.key.toLowerCase();
-      if (k === 'c') { triggerWarning("Acción bloqueada: Intento de copiar contenido"); e.preventDefault(); }
-      if (k === 'v') { triggerWarning("Acción bloqueada: Intento de pegar contenido"); e.preventDefault(); }
-      if (k === 'x') { triggerWarning("Acción bloqueada: Intento de cortar contenido"); e.preventDefault(); }
-      if (k === 'a') { triggerWarning("Acción bloqueada: Selección masiva"); e.preventDefault(); }
-      if (k === 'p') { triggerWarning("Acción bloqueada: Intento de impresión / guardado"); e.preventDefault(); }
-      if (k === 'u') { triggerWarning("Acción bloqueada: Inspección de código"); e.preventDefault(); }
-      if (k === 's') { triggerWarning("Acción bloqueada: Guardar página"); e.preventDefault(); }
+      if (['c', 'v', 'x', 'a', 'p', 'u', 's'].includes(k)) { 
+        triggerWarning(`Acción no permitida (Ctrl + ${k.toUpperCase()})`); 
+        e.preventDefault(); 
+      }
     }
 
-    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j'))) {
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i', 'j'].includes(e.key.toLowerCase()))) {
       triggerWarning("Acción bloqueada: Acceso a Herramientas de Desarrollo");
       e.preventDefault();
     }
   });
 
+  // 5. Eventos de portapapeles
   document.addEventListener('copy', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Copiar texto"); e.preventDefault(); } });
   document.addEventListener('paste', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Pegar texto"); e.preventDefault(); } });
   document.addEventListener('cut', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Cortar texto"); e.preventDefault(); } });
 }
 
+/* ======================================================
+   REPORTE INDIVIDUAL Y DESCARGA EN PDF
+====================================================== */
+
+function abrirModalConsultaEstudiante(){
+  document.getElementById('consulta-pass').value = '';
+  document.getElementById('consulta-login-step').style.display = 'block';
+  document.getElementById('consulta-result-step').style.display = 'none';
+  document.getElementById('modal-consulta').classList.add('open');
+}
+
+async function verificarYGenerarReporteIndividual(){
+  const nombre = document.getElementById('consulta-select-est').value;
+  const pass = document.getElementById('consulta-pass').value.trim();
+
+  if(!nombre) { showToast('Selecciona un estudiante', 'error'); return; }
+  if(!pass) { showToast('Ingresa la contraseña', 'error'); return; }
+
+  const claveGuardada = STATE.claves[nombre];
+  if(claveGuardada !== pass){
+    showToast('Contraseña incorrecta', 'error');
+    return;
+  }
+
+  showToast('Cargando reporte...', 'success');
+
+  try {
+    const r = await fetch(`${GAS_URL}?action=getReporteEstudiante&estudiante=${encodeURIComponent(nombre)}`);
+    const data = await r.json();
+
+    if(data.success && data.resultados){
+      poblarReporteVisual(nombre, data.resultados);
+      document.getElementById('consulta-login-step').style.display = 'none';
+      document.getElementById('consulta-result-step').style.display = 'block';
+    } else {
+      showToast('No se encontraron respuestas registradas aún', 'error');
+    }
+  } catch(e) {
+    showToast('Error al obtener reporte del servidor', 'error');
+  }
+}
+
+function poblarReporteVisual(nombre, datos){
+  document.getElementById('rep-pdf-estudiante').textContent = `Estudiante: ${nombre}`;
+  document.getElementById('rep-pdf-id').textContent = `ID VERIFICACIÓN: ${datos.idVerificacion || 'ST-' + Math.random().toString(36).substr(2,6).toUpperCase() + '-2026'}`;
+  document.getElementById('rep-pdf-global').textContent = `${datos.global || 0} / 500`;
+  document.getElementById('rep-pdf-percentil').textContent = `${datos.percentil || 0}%`;
+
+  const areas = [
+    { key: 'mat', val: datos.mat || 0 },
+    { key: 'lec', val: datos.lec || 0 },
+    { key: 'cn',  val: datos.cn || 0 },
+    { key: 'soc', val: datos.soc || 0 },
+    { key: 'ing', val: datos.ing || 0 }
+  ];
+
+  areas.forEach(a => {
+    document.getElementById(`rep-val-${a.key}`).textContent = a.val;
+    const badge = document.getElementById(`rep-badge-${a.key}`);
+    if(a.val >= 60){
+      badge.textContent = 'FORTALEZA';
+      badge.className = 'score-badge bueno';
+    } else {
+      badge.textContent = 'REFORZAR';
+      badge.className = 'score-badge reforzar';
+    }
+  });
+}
+
+function descargarReportePDFActual(){
+  const elemento = document.getElementById('contenedor-reporte-pdf');
+  const estNombre = document.getElementById('consulta-select-est').value || 'Estudiante';
+
+  const opciones = {
+    margin: [0.3, 0.3, 0.3, 0.3],
+    filename: `Certificado_SABER_TECH_${estNombre.replace(/\s+/g, '_')}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opciones).from(elemento).save();
+}
+
+/* ======================================================
+   GESTIÓN DOCENTE Y SALIDA
+====================================================== */
+
 function abrirModalDocente(){
   document.getElementById('teacher-pass-input').value = '';
   document.getElementById('teacher-auth-step').style.display = 'block';
   document.getElementById('teacher-controls-step').style.display = 'none';
+  document.getElementById('btn-logout-teacher').style.display = 'none';
   document.getElementById('modal-teacher').classList.add('open');
 }
 
@@ -967,13 +1189,21 @@ async function verificarDocente(){
     if(data.success){
       document.getElementById('teacher-auth-step').style.display = 'none';
       document.getElementById('teacher-controls-step').style.display = 'block';
+      document.getElementById('btn-logout-teacher').style.display = 'inline-flex';
       poblarCamposPanelDocente();
     } else {
       showToast(data.error || 'Contraseña incorrecta', 'error');
     }
-  } catch(e) {
-    showToast('Error de conexión con el servidor', 'error');
-  }
+  } catch(e) { showToast('Error de conexión con el servidor', 'error'); }
+}
+
+function cerrarSesionDocente(){
+  document.getElementById('teacher-pass-input').value = '';
+  document.getElementById('teacher-controls-step').style.display = 'none';
+  document.getElementById('btn-logout-teacher').style.display = 'none';
+  document.getElementById('teacher-auth-step').style.display = 'block';
+  cerrarModal('modal-teacher');
+  showToast('Sesión de administrador cerrada correctamente', 'success');
 }
 
 function poblarCamposPanelDocente(){
@@ -995,7 +1225,7 @@ function poblarCamposPanelDocente(){
 }
 
 function renderizarConfiguracionIngles(){
-  const count = parseInt(document.getElementById('cfg-s2-ing').value) || 55;
+  const count = parseInt(document.getElementById('cfg-s2-ing').value) || 45;
   const soc = parseInt(document.getElementById('cfg-s2-soc').value) || 25;
   const mat = parseInt(document.getElementById('cfg-s2-mat').value) || 25;
   const cn = parseInt(document.getElementById('cfg-s2-cn').value) || 29;
@@ -1012,7 +1242,7 @@ function renderizarConfiguracionIngles(){
     const div = document.createElement('div');
     div.className = 'ingles-item';
     div.innerHTML = `
-      <span style="font-weight:900; font-size:0.75rem;">Pregunta ${qKey}</span>
+      <span style="font-weight:900; font-size:0.75rem;">${qKey} (${i})</span>
       <select class="form-select cfg-ing-select" data-qkey="${qKey}" style="padding:0.2rem; font-size:0.7rem;">
         <option value="A,B,C" ${optsActuales === 'A,B,C' ? 'selected' : ''}>3 Opciones (A,B,C)</option>
         <option value="A,B,C,D" ${optsActuales === 'A,B,C,D' ? 'selected' : ''}>4 Opciones (A,B,C,D)</option>
@@ -1060,11 +1290,11 @@ async function cargarReportesDocente(){
 
 async function descargarInformeExcel(){
   try {
-    showToast('Generando informe...', 'success');
+    showToast('Generando informe general...', 'success');
     const r = await fetch(GAS_URL + '?action=getMatrizResultados');
     const data = await r.json();
     if(data.success && data.matriz){
-      let csvContent = "\uFEFF"; // BOM para UTF-8 en Excel
+      let csvContent = "\uFEFF"; 
       data.matriz.forEach(rowArray => {
         let row = rowArray.map(item => `"${(item || '').toString().replace(/"/g, '""')}"`).join(";");
         csvContent += row + "\r\n";
@@ -1074,16 +1304,14 @@ async function descargarInformeExcel(){
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
-      link.setAttribute("download", `Informe_SABER_TECH_${new Date().toISOString().substring(0,10)}.csv`);
+      link.setAttribute("download", `Informe_General_SABER_TECH_${new Date().toISOString().substring(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } else {
       showToast('No hay resultados para exportar', 'error');
     }
-  } catch(e) {
-    showToast('Error al descargar el informe', 'error');
-  }
+  } catch(e) { showToast('Error al descargar el informe', 'error'); }
 }
 
 async function guardarConfiguracionDocente(){
