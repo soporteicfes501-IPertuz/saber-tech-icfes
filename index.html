@@ -363,7 +363,7 @@ th { background: #f1f5f9; font-weight: 800; }
 <!-- PANEL DOCENTE -->
 <div class="modal-overlay" id="modal-teacher">
   <div class="modal-box">
-    <div style="display:flex; justify-style:space-between; align-items:center; margin-bottom:0.8rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
       <h3 style="font-weight:900;">⚙️ Panel de Control Docente</h3>
       <button id="btn-logout-teacher" class="btn btn-outline" style="width:auto; padding:0.3rem 0.6rem; font-size:0.75rem; display:none; background:#fee2e2; color:#b91c1c; border-color:#fca5a5;" onclick="cerrarSesionDocente()">🚪 Cerrar Sesión Docente</button>
     </div>
@@ -725,13 +725,9 @@ function actualizarEstadoBotonReporte(){
   }
 }
 
-/*
-  Ajuste de Estructura de Sesiones:
-  - Sesión 2: Sociales(25) + Mat(25) + Ciencias(29) + Inglés(45) = 124 preguntas en total.
-*/
 function obtenerEstructuraSesiones(){
-  const s2InglesCount = STATE.config.s2.ing; // Default: 45
-  const s2OffsetIngles = STATE.config.s2.soc + STATE.config.s2.mat + STATE.config.s2.cn; // 25 + 25 + 29 = 79
+  const s2InglesCount = STATE.config.s2.ing;
+  const s2OffsetIngles = STATE.config.s2.soc + STATE.config.s2.mat + STATE.config.s2.cn;
 
   return {
     S1: [
@@ -1058,18 +1054,15 @@ function triggerWarning(msg) {
 }
 
 function initAntiCheating(){
-  // 1. Detección por cambio de pestaña o minimización de ventana
   window.addEventListener('blur', () => triggerWarning("Intento de abandono de pantalla / cambio de pestaña."));
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) triggerWarning("Ventana minimizada o fuera de foco.");
   });
 
-  // 2. Detección de intento de impresión de pantalla
   window.addEventListener('beforeprint', () => {
     triggerWarning("Intento de impresión del examen detectado");
   });
 
-  // 3. SIN WARNING POR CLIC SENCILLO: Se activa ÚNICAMENTE si se selecciona y arrastra un fragmento largo de texto
   document.addEventListener('selectionchange', () => {
     if(!STATE.examActive) return;
     const selection = window.getSelection();
@@ -1079,7 +1072,6 @@ function initAntiCheating(){
     }
   });
 
-  // 4. Teclas prohibidas (PrintScreen, Ctrl+C, Ctrl+V, F12)
   document.addEventListener('keydown', (e) => {
     if(!STATE.examActive) return;
 
@@ -1103,7 +1095,6 @@ function initAntiCheating(){
     }
   });
 
-  // 5. Eventos de portapapeles
   document.addEventListener('copy', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Copiar texto"); e.preventDefault(); } });
   document.addEventListener('paste', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Pegar texto"); e.preventDefault(); } });
   document.addEventListener('cut', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Cortar texto"); e.preventDefault(); } });
@@ -1265,7 +1256,7 @@ function renderizarConfiguracionIngles(){
   const soc = parseInt(document.getElementById('cfg-s2-soc').value) || 25;
   const mat = parseInt(document.getElementById('cfg-s2-mat').value) || 25;
   const cn = parseInt(document.getElementById('cfg-s2-cn').value) || 29;
-  const startOffset = soc + mat + cn; // Offset: 79
+  const startOffset = soc + mat + cn;
 
   const grid = document.getElementById('ingles-questions-grid');
   grid.innerHTML = '';
