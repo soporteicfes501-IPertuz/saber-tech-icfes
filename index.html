@@ -12,9 +12,7 @@
       --card-bg: #ffffff;
       --text: #1f2937;
       --danger: #e02424;
-      --danger-hover: #9b1c1c;
       --success: #0e9f6e;
-      --secondary: #6b7280;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -32,13 +30,7 @@
     button:hover { background-color: var(--primary-hover); }
     button:disabled { background-color: #9ca3af; cursor: not-allowed; }
 
-    .btn-danger { background-color: var(--danger); }
-    .btn-danger:hover { background-color: var(--danger-hover); }
-    .btn-secondary { background-color: var(--secondary); }
-    .btn-secondary:hover { background-color: #4b5563; }
-
     .hidden { display: none !important; }
-    
     .alert { padding: 12px; border-radius: 5px; margin-bottom: 15px; font-weight: 500; }
     .alert-danger { background-color: #fde8e8; color: var(--danger); }
     .alert-success { background-color: #def7ec; color: var(--success); }
@@ -49,8 +41,9 @@
     .opt-btn { width: 50px; height: 50px; border-radius: 50%; font-weight: bold; background: #e5e7eb; color: var(--text); border: none; }
     .opt-btn.selected { background: var(--primary); color: white; }
 
-    /* Modal Docente */
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    /* Modal Docente corrigiendo ocultamiento inicial */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
+    .modal.hidden { display: none !important; }
     .modal-content { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; }
   </style>
 </head>
@@ -85,42 +78,34 @@
         <option value="2">Sesión 2</option>
       </select>
     </div>
-    
-    <div style="display: flex; gap: 10px;">
-      <button type="button" onclick="iniciarExamen()">Ingresar al Examen</button>
-      <button type="button" onclick="regresarAlInicio()" class="btn-secondary" style="width: 30%;">Limpiar</button>
-    </div>
-
+    <button onclick="iniciarExamen()">Ingresar al Examen</button>
     <div style="margin-top: 15px; text-align: right;">
-      <a href="javascript:void(0)" onclick="abrirModalDocente(event)" style="color: var(--primary); font-size: 14px;">Acceso Docente</a>
+      <a href="#" onclick="abrirModalDocente()" style="color: var(--primary); font-size: 14px;">Acceso Docente</a>
     </div>
   </div>
 
   <!-- PANTALLA 2: EVALUACIÓN / HOJA DE RESPUESTAS -->
   <div id="view-examen" class="card hidden">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-      <div>
-        <h2 id="estudiante-info" style="margin-bottom:0;">Estudiante</h2>
-        <span id="badge-advertencias" style="color: var(--danger); font-weight:bold; font-size: 14px;">Infracciones: 0</span>
-      </div>
-      <button type="button" onclick="salirExamenEstudiante()" class="btn-danger" style="width: auto; padding: 8px 18px;">Salir del Examen</button>
+      <h2 id="estudiante-info">Estudiante</h2>
+      <span id="badge-advertencias" style="color: var(--danger); font-weight:bold;">Infracciones: 0</span>
     </div>
 
     <div id="preguntas-container">
       <!-- Generado dinámicamente -->
     </div>
 
-    <button type="button" onclick="finalizarExamen()" style="background-color: var(--success); margin-top:20px;">Finalizar y Guardar Todo</button>
+    <button onclick="finalizarExamen()" style="background-color: var(--success); margin-top:20px;">Finalizar y Guardar Todo</button>
   </div>
 
   <!-- PANTALLA 3: PANEL DOCENTE -->
   <div id="view-docente" class="card hidden">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h2>Panel del Docente</h2>
-      <button type="button" onclick="regresarAlInicio()" class="btn-secondary" style="width: auto; padding: 8px 18px;">Salir</button>
+      <button onclick="cerrarSesionDocente()" style="width: auto; padding: 5px 15px; background: #6b7280;">Salir</button>
     </div>
     <div style="margin-top: 20px;">
-      <button type="button" onclick="cargarReportes()" style="margin-bottom: 10px;">Actualizar Reportes</button>
+      <button onclick="cargarReportes()" style="margin-bottom: 10px;">Actualizar Reportes</button>
       <div id="reportes-output" style="background:#f8fafc; padding:10px; border-radius:5px; font-family:monospace; font-size:12px; white-space:pre-wrap; max-height:300px; overflow-y:auto;">
         Haga clic en 'Actualizar Reportes' para ver los datos de la hoja.
       </div>
@@ -129,19 +114,20 @@
 
 </div>
 
-<!-- MODAL DOCENTE -->
-<div id="modal-docente" class="modal hidden" style="display: none;">
+<!-- MODAL DOCENTE (Inicia Oculto) -->
+<div id="modal-docente" class="modal hidden">
   <div class="modal-content">
     <h3>Autenticación Docente</h3>
     <div class="form-group" style="margin-top:10px;">
       <input type="password" id="input-teacher-pass" placeholder="Contraseña Docente">
     </div>
-    <button type="button" onclick="loginDocente()">Entrar</button>
-    <button type="button" onclick="cerrarModalDocente(event)" class="btn-secondary" style="margin-top:8px;">Cancelar / Salir</button>
+    <button onclick="loginDocente()">Entrar</button>
+    <button onclick="cerrarModalDocente()" style="background:#6b7280; margin-top:5px;">Cancelar</button>
   </div>
 </div>
 
 <script>
+  // URL del Web App de Google Apps Script
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec'; 
 
   let globalData = {
@@ -155,11 +141,13 @@
     respuestasGuardadas: {}
   };
 
+  // Inicialización
   window.onload = function() {
     cargarDatosIniciales();
     configurarControlInfracciones();
   };
 
+  // 1. CARGAR DATOS DE INICIALIZACIÓN
   function cargarDatosIniciales() {
     mostrarAlerta('Cargando datos del sistema...', 'info');
     const script = document.createElement('script');
@@ -168,14 +156,14 @@
   }
 
   function procesarInit(response) {
-    if (response && response.success) {
-      globalData.estudiantes = response.estudiantes || [];
-      globalData.claves = response.claves || {};
+    if (response.success) {
+      globalData.estudiantes = response.estudiantes;
+      globalData.claves = response.claves;
       
       const select = document.getElementById('select-estudiante');
       select.innerHTML = '<option value="">-- Selecciona un estudiante --</option>';
       
-      globalData.estudiantes.forEach(est => {
+      response.estudiantes.forEach(est => {
         const opt = document.createElement('option');
         opt.value = est.nombre;
         opt.textContent = `${est.nombre} (${est.grado})`;
@@ -184,10 +172,11 @@
       });
       ocultarAlerta();
     } else {
-      mostrarAlerta('Error cargando lista de estudiantes.', 'danger');
+      mostrarAlerta('Error cargando lista de estudiantes: ' + response.error, 'danger');
     }
   }
 
+  // 2. REGISTRO DE RESPUESTAS AL INSTANTE
   function guardarRespuestaIndividual(numPregunta, opcion) {
     globalData.respuestasGuardadas[`P${numPregunta}`] = opcion;
 
@@ -206,9 +195,14 @@
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
-    }).catch(err => console.error('Error guardando respuesta:', err));
+    }).then(() => {
+      console.log(`Guardada P${numPregunta} = ${opcion}`);
+    }).catch(err => {
+      console.error('Error al guardar respuesta:', err);
+    });
   }
 
+  // 3. REGISTRO DE INFRACCIONES
   function registrarInfraccionBackend() {
     globalData.advertencias++;
     document.getElementById('badge-advertencias').textContent = `Infracciones: ${globalData.advertencias}`;
@@ -226,7 +220,7 @@
       body: JSON.stringify(payload)
     });
     
-    alert(`¡ADVERTENCIA! Has salido de la pantalla del examen. Infracción registrada (${globalData.advertencias}).`);
+    alert(`¡ADVERTENCIA! Has salido de la pantalla del examen. Esta infracción ha sido registrada (${globalData.advertencias}).`);
   }
 
   function configurarControlInfracciones() {
@@ -237,6 +231,7 @@
     });
   }
 
+  // 4. LÓGICA INTERFAZ Y NAVEGACIÓN
   function iniciarExamen() {
     const select = document.getElementById('select-estudiante');
     const estNombre = select.value;
@@ -287,8 +282,8 @@
         btn.className = 'opt-btn';
         btn.textContent = opcion;
         btn.onclick = function() {
-          optGrid.querySelectorAll('.opt-btn').forEach(b => b.className = 'opt-btn');
-          btn.className = 'opt-btn selected';
+          optGrid.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
           guardarRespuestaIndividual(i, opcion);
         };
         optGrid.appendChild(btn);
@@ -301,56 +296,23 @@
 
   function finalizarExamen() {
     if (confirm('¿Estás seguro de que deseas finalizar el examen?')) {
-      alert('Respuestas registradas exitosamente.');
-      regresarAlInicio();
+      alert('Respuestas registradas exitosamente. Puedes cerrar la ventana.');
+      location.reload();
     }
   }
 
-  function salirExamenEstudiante() {
-    if (confirm('¿Estás seguro de que deseas salir del examen? Se conservarán las respuestas guardadas.')) {
-      regresarAlInicio();
-    }
-  }
-
-  // --- MENEJO DE MODAL DOCENTE Y REGRESO ---
-  function abrirModalDocente(e) { 
-    if (e) e.preventDefault();
-    const modal = document.getElementById('modal-docente');
-    modal.classList.remove('hidden'); 
-    modal.style.display = 'flex';
-  }
-
-  function cerrarModalDocente(e) { 
-    if (e) e.preventDefault();
+  // 5. LÓGICA LOGIN Y PANEL DOCENTE (RESTAURADA A LA VERSIÓN ORIGINAL)
+  function abrirModalDocente() { 
     document.getElementById('input-teacher-pass').value = '';
-    const modal = document.getElementById('modal-docente');
-    modal.classList.add('hidden'); 
-    modal.style.display = 'none';
+    document.getElementById('modal-docente').classList.remove('hidden'); 
   }
-
-  function regresarAlInicio() {
-    globalData.estudianteActual = null;
-    globalData.gradoActual = '';
-    globalData.advertencias = 0;
-    globalData.respuestasGuardadas = {};
-
-    document.getElementById('input-clave').value = '';
-    document.getElementById('input-teacher-pass').value = '';
-    document.getElementById('select-estudiante').value = '';
-    
-    document.getElementById('view-examen').classList.add('hidden');
-    document.getElementById('view-docente').classList.add('hidden');
-    cerrarModalDocente();
-    
-    document.getElementById('view-login').classList.remove('hidden');
+  
+  function cerrarModalDocente() { 
+    document.getElementById('modal-docente').classList.add('hidden'); 
   }
 
   function loginDocente() {
     const pass = document.getElementById('input-teacher-pass').value;
-    if (!pass) {
-      alert('Por favor ingresa la contraseña.');
-      return;
-    }
     mostrarAlerta('Verificando contraseña...', 'info');
 
     const script = document.createElement('script');
@@ -360,7 +322,7 @@
 
   function procesarLoginDocente(resp) {
     const pass = document.getElementById('input-teacher-pass').value;
-    if (pass === 'saber2026') {
+    if (pass === 'saber2026') { 
       cerrarModalDocente();
       ocultarAlerta();
       document.getElementById('view-login').classList.add('hidden');
@@ -381,13 +343,19 @@
   }
 
   function mostrarReportes(resp) {
-    if (resp && resp.success) {
+    if (resp.success) {
       document.getElementById('reportes-output').textContent = JSON.stringify(resp, null, 2);
     } else {
-      document.getElementById('reportes-output').textContent = "Error: " + (resp ? resp.error : 'No se pudo obtener datos');
+      document.getElementById('reportes-output').textContent = "Error: " + resp.error;
     }
   }
 
+  function cerrarSesionDocente() {
+    document.getElementById('view-docente').classList.add('hidden');
+    document.getElementById('view-login').classList.remove('hidden');
+  }
+
+  // UTILIDADES DE ALERTA
   function mostrarAlerta(msg, type) {
     const el = document.getElementById('status-alert');
     el.className = `alert alert-${type === 'danger' ? 'danger' : 'success'}`;
