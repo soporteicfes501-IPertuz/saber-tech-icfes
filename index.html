@@ -1,416 +1,1421 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SABER TECH — Plataforma de Evaluación</title>
-  <style>
-    :root {
-      --primary: #1a56db;
-      --primary-hover: #1e429f;
-      --bg: #f3f4f6;
-      --card-bg: #ffffff;
-      --text: #1f2937;
-      --danger: #e02424;
-      --success: #0e9f6e;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SABER TECH · I.E.D. San José de Sitionuevo</title>
+<!-- Librería para generación de PDF en el cliente -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --bg-main: #f8fafc;
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-600: #475569;
+  --slate-300: #cbd5e1;
+  --green: #10b981;
+  --red: #ef4444;
+  --yellow: #f59e0b;
+  --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
+  --radius: 0.75rem;
+}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 15px; }
-    
-    .container { max-width: 1400px; margin: 0 auto; }
-    .card { background: var(--card-bg); padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    
-    h1, h2 { color: var(--primary); margin-bottom: 15px; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input, select, button { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
-    
-    button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; transition: background 0.2s; }
-    button:hover { background-color: var(--primary-hover); }
+*, *::before, *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+  user-select: none !important; 
+  -webkit-user-select: none !important;
+}
 
-    .hidden { display: none !important; }
-    .alert { padding: 12px; border-radius: 5px; margin-bottom: 15px; font-weight: 500; }
-    .alert-danger { background-color: #fde8e8; color: var(--danger); }
-    .alert-success { background-color: #def7ec; color: var(--success); }
-    
-    /* --- DISEÑO DE DOS PANELES (EXAMEN) --- */
-    .examen-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 15px;
-    }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--slate-800); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    @media (max-width: 900px) {
-      .examen-grid {
-        grid-template-columns: 1fr; /* Apilado en pantallas pequeñas */
-      }
-    }
+@media print { body { display: none !important; } }
 
-    .panel-pdf {
-      background: #e5e7eb;
-      border-radius: 8px;
-      overflow: hidden;
-      min-height: 600px;
-      display: flex;
-      flex-direction: column;
-    }
+.topbar { background: white; border-bottom: 1px solid var(--slate-300); padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 60px; position: relative; }
+.topbar-brand { display: flex; align-items: center; gap: 0.75rem; margin: 0 auto; }
+.topbar-brand img { height: 40px; width: auto; object-fit: contain; }
+.topbar-title { font-size: 1.1rem; font-weight: 900; color: var(--slate-900); }
+.topbar-subtitle { font-size: 0.7rem; color: var(--primary); font-weight: 700; text-transform: uppercase; }
+.topbar-actions { position: absolute; right: 1.5rem; display: flex; gap: 0.5rem; }
+.btn-topbar { background: #f1f5f9; border: 1px solid var(--slate-300); padding: 0.4rem 0.8rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+.btn-topbar:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .panel-pdf iframe {
-      width: 100%;
-      height: 100%;
-      min-height: 600px;
-      border: none;
-    }
+/* Indicador de red */
+.net-status { font-size: 0.7rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 1rem; display: flex; align-items: center; gap: 0.3rem; position: absolute; left: 1.5rem; }
+.net-status.online { background: #dcfce7; color: #15803d; }
+.net-status.offline { background: #fee2e2; color: #b91c1c; }
 
-    .panel-respuestas {
-      max-height: 75vh;
-      overflow-y: auto;
-      padding-right: 10px;
-    }
+.screen { display: none; flex: 1; height: calc(100vh - 60px); }
+.screen.active { display: flex; }
 
-    /* Opciones de Preguntas */
-    .question-box { margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px; }
-    .options-grid { display: flex; gap: 10px; margin-top: 8px; }
-    .opt-btn { width: 45px; height: 45px; border-radius: 50%; font-weight: bold; background: #e5e7eb; color: var(--text); border: none; cursor: pointer; }
-    .opt-btn.selected { background: var(--primary); color: white; }
+#screen-login { align-items: center; justify-content: center; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); flex-direction: column; }
+.login-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 2.5rem; width: 100%; max-width: 460px; text-align: center; }
+.protocol-tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 0.3rem 0.8rem; border-radius: 1rem; font-weight: 800; font-size: 0.75rem; margin-top: 0.5rem; }
 
-    /* Modal Docente */
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
-    .modal.hidden { display: none !important; }
-    .modal-content { background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; }
-  </style>
+.form-group { margin-bottom: 1rem; text-align: left; }
+.form-label { display: block; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--slate-600); margin-bottom: 0.3rem; }
+.form-select, .form-input { width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid var(--slate-300); border-radius: 0.5rem; font-size: 0.85rem; background: white; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.75rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 800; cursor: pointer; border: none; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-outline { background: white; color: var(--slate-600); border: 1.5px solid var(--slate-300); }
+.btn-danger { background: var(--red); color: white; }
+.btn-success { background: var(--green); color: white; }
+
+#screen-welcome { align-items: center; justify-content: center; background: var(--bg-main); padding: 2rem; }
+.welcome-card { background: white; border-radius: var(--radius); padding: 2.5rem; max-width: 650px; width: 100%; box-shadow: var(--shadow-lg); }
+
+#screen-answers { width: 100%; height: calc(100vh - 60px); flex-direction: row; }
+.pdf-pane { width: 88%; height: 100%; background: #525659; }
+.pdf-pane iframe { width: 100%; height: 100%; border: none; }
+
+.answers-pane { width: 12%; min-width: 220px; height: 100%; background: white; display: flex; flex-direction: column; border-left: 1px solid var(--slate-300); }
+.exam-info-bar { padding: 0.4rem; background: var(--slate-900); color: white; text-align: center; }
+.timer-badge { background: #334155; color: #38bdf8; font-weight: 900; font-size: 0.75rem; padding: 0.2rem 0.4rem; border-radius: 0.25rem; margin-top: 0.2rem; display: inline-block; }
+
+.area-tabs-vertical { display: flex; flex-direction: column; padding: 0.3rem; background: #f1f5f9; gap: 0.2rem; border-bottom: 1px solid var(--slate-300); }
+.tab-btn { padding: 0.3rem; border-radius: 0.3rem; font-size: 0.6rem; font-weight: 800; border: 1px solid var(--slate-300); background: white; cursor: pointer; text-align: center; }
+.tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.answers-list { flex: 1; overflow-y: auto; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.25rem; }
+
+.q-row-line { display: flex; align-items: center; justify-content: space-between; background: var(--bg-main); padding: 0.25rem 0.4rem; border-radius: 0.3rem; border: 1px solid var(--slate-300); }
+.q-num-inline { font-size: 0.65rem; font-weight: 900; min-width: 50px; }
+.q-opts-inline { display: flex; gap: 0.15rem; align-items: center; flex-wrap: wrap; }
+.opt-bubble { width: 19px; height: 19px; border-radius: 50%; border: 1px solid var(--slate-300); background: white; font-size: 0.55rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.opt-bubble.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+#center-warning-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+#center-warning-modal.active { display: flex; animation: popup 0.2s ease-out; }
+.warning-card { background: white; border-top: 6px solid var(--red); border-radius: var(--radius); padding: 2rem; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.3); }
+
+/* Modal de Sincronización Bloqueante */
+#sync-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10000; }
+#sync-modal.active { display: flex; }
+.sync-card { background: white; border-radius: var(--radius); padding: 2.5rem; max-width: 450px; width: 90%; text-align: center; box-shadow: var(--shadow-lg); }
+.spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+@keyframes popup { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: white; border-radius: var(--radius); padding: 1.5rem; max-width: 750px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+
+.teacher-tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid var(--slate-300); margin-bottom: 1rem; }
+.t-tab { padding: 0.5rem 1rem; font-weight: 800; font-size: 0.8rem; cursor: pointer; border-bottom: 3px solid transparent; }
+.t-tab.active { border-color: var(--primary); color: var(--primary); }
+
+#toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--slate-900); color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 700; z-index: 300; transition: transform 0.25s ease; }
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.error { background: var(--red); }
+#toast.success { background: var(--green); }
+.loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 400; font-weight: 700; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 0.5rem; }
+th, td { border: 1px solid var(--slate-300); padding: 0.4rem; text-align: left; }
+th { background: #f1f5f9; font-weight: 800; }
+
+.ingles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; max-height: 300px; overflow-y: auto; padding: 0.5rem; background: #f8fafc; border: 1px solid var(--slate-300); border-radius: 0.5rem; }
+.ingles-item { background: white; padding: 0.4rem; border-radius: 0.3rem; border: 1px solid var(--slate-300); display: flex; flex-direction: column; gap: 0.2rem; }
+
+#pdf-report-template { background: white; padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--slate-300); margin-top: 1rem; }
+.report-header { text-align: center; border-bottom: 2px solid var(--slate-900); padding-bottom: 0.8rem; margin-bottom: 1rem; }
+.report-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin: 1rem 0; text-align: center; }
+.score-card { border: 1px solid var(--slate-300); padding: 0.6rem; border-radius: 0.5rem; background: #f8fafc; }
+.score-card-title { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--slate-600); }
+.score-card-value { font-size: 1.2rem; font-weight: 900; color: var(--slate-900); margin: 0.2rem 0; }
+.score-badge { display: inline-block; font-size: 0.6rem; font-weight: 800; padding: 0.1rem 0.4rem; border-radius: 0.3rem; }
+.score-badge.reforzar { background: #fee2e2; color: #b91c1c; }
+.score-badge.bueno { background: #dcfce7; color: #15803d; }
+</style>
 </head>
 <body>
 
-<div class="container">
-
-  <!-- ESTADO DE CONEXIÓN Y ALERTAS -->
-  <div id="status-alert" class="alert hidden"></div>
-
-  <!-- PANTALLA 1: INICIO DE SESIÓN ESTUDIANTE -->
-  <div id="view-login" class="card" style="max-width: 500px; margin: 40px auto;">
-    <h2>SABER TECH — Acceso Estudiante</h2>
-    <div class="form-group">
-      <label>Selecciona tu Nombre:</label>
-      <select id="select-estudiante">
-        <option value="">Cargando lista de estudiantes...</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Clave de Acceso (si aplica):</label>
-      <input type="password" id="input-clave" placeholder="Ingresa tu clave">
-    </div>
-    <div class="form-group">
-      <label>Protocolo de Examen:</label>
-      <input type="text" id="input-protocolo" value="ICFES-SABER11" placeholder="Ej: ICFES-SABER11">
-    </div>
-    <div class="form-group">
-      <label>Sesión:</label>
-      <select id="select-sesion">
-        <option value="1">Sesión 1</option>
-        <option value="2">Sesión 2</option>
-      </select>
-    </div>
-    <button onclick="iniciarExamen()">Ingresar al Examen</button>
-    <div style="margin-top: 15px; text-align: right;">
-      <a href="#" onclick="abrirModalDocente()" style="color: var(--primary); font-size: 14px;">Acceso Docente</a>
-    </div>
-  </div>
-
-  <!-- PANTALLA 2: EVALUACIÓN CON DOS PANELES -->
-  <div id="view-examen" class="card hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px;">
-      <h2 id="estudiante-info" style="margin-bottom:0;">Estudiante</h2>
-      <span id="badge-advertencias" style="color: var(--danger); font-weight:bold;">Infracciones: 0</span>
-    </div>
-
-    <!-- CONTENEDOR DE DOS COLUMNAS -->
-    <div class="examen-grid">
-      
-      <!-- MÓDULO 1: CUADERNILLO PDF -->
-      <div class="panel-pdf">
-        <iframe id="pdf-viewer" src="about:blank" title="Cuadernillo de Preguntas"></iframe>
-      </div>
-
-      <!-- MÓDULO 2: HOJA DE RESPUESTAS -->
-      <div class="panel-respuestas">
-        <h3>Hoja de Respuestas</h3>
-        <p style="font-size: 13px; color: #6b7280; margin-bottom: 15px;">Selecciona la opción elegida para cada pregunta. Las respuestas se guardan automáticamente.</p>
-        
-        <div id="preguntas-container">
-          <!-- Generado dinámicamente por JS -->
-        </div>
-
-        <button onclick="finalizarExamen()" style="background-color: var(--success); margin-top:20px;">Finalizar y Guardar Todo</button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- PANTALLA 3: PANEL DOCENTE -->
-  <div id="view-docente" class="card hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h2>Panel del Docente</h2>
-      <button onclick="cerrarSesionDocente()" style="width: auto; padding: 5px 15px; background: #6b7280;">Salir</button>
-    </div>
-    <div style="margin-top: 20px;">
-      <button onclick="cargarReportes()" style="margin-bottom: 10px;">Actualizar Reportes</button>
-      <div id="reportes-output" style="background:#f8fafc; padding:10px; border-radius:5px; font-family:monospace; font-size:12px; white-space:pre-wrap; max-height:300px; overflow-y:auto;">
-        Haga clic en 'Actualizar Reportes' para ver los datos de la hoja.
-      </div>
-    </div>
-  </div>
-
+<div class="loading-overlay" id="loading-overlay">
+  <p>Cargando Plataforma SABER TECH…</p>
 </div>
 
-<!-- MODAL DOCENTE -->
-<div id="modal-docente" class="modal hidden">
-  <div class="modal-content">
-    <h3>Autenticación Docente</h3>
-    <div class="form-group" style="margin-top:10px;">
-      <input type="password" id="input-teacher-pass" placeholder="Contraseña Docente">
+<!-- Modal de Infracciones -->
+<div id="center-warning-modal">
+  <div class="warning-card">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚠️</div>
+    <h3 style="font-weight: 900; color: var(--red); margin-bottom: 0.5rem;">¡ACCIÓN NO PERMITIDA!</h3>
+    <p id="warning-msg-text" style="font-size: 0.85rem; font-weight: 700; color: var(--slate-800);"></p>
+    <div style="margin-top: 1rem; font-size: 0.7rem; color: var(--slate-600); font-weight: 800;">
+      Esta infracción ha sido registrada en el sistema.
     </div>
-    <button onclick="loginDocente()">Entrar</button>
-    <button onclick="cerrarModalDocente()" style="background:#6b7280; margin-top:5px;">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal Bloqueante: Esperando Sincronización de Respuestas -->
+<div id="sync-modal">
+  <div class="sync-card">
+    <div class="spinner" id="sync-spinner"></div>
+    <h3 style="font-weight: 900; color: var(--slate-900); margin-bottom: 0.5rem;" id="sync-title">Esperando Sincronización de Respuestas...</h3>
+    <p style="font-size: 0.85rem; color: var(--slate-600); line-height: 1.4;" id="sync-msg">
+      Guardando el paquete completo de respuestas en la nube para evitar pérdida de celdas. 
+      <strong>Por favor, no cierre esta página ni intente salir.</strong>
+    </p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div class="topbar">
+  <div class="net-status online" id="net-status-badge">● En línea</div>
+  <div class="topbar-brand">
+    <img src="IMAGENSANJOSE.png" alt="Logo" onerror="this.style.display='none'">
+    <div>
+      <div class="topbar-title">I.E.D. SAN JOSÉ DE SITIONUEVO</div>
+      <div class="topbar-subtitle">Plataforma Digital Saber 11</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-topbar" id="btn-topbar-reporte" onclick="abrirModalConsultaEstudiante()" disabled title="Los reportes se habilitarán cuando los resultados estén procesados">📄 Consultar Mi Reporte PDF</button>
+    <button class="btn-topbar" onclick="abrirModalDocente()">⚙️ Panel Docente</button>
+  </div>
+</div>
+
+<!-- 1. LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div style="margin-bottom:1.2rem;">
+      <h2 style="font-size:1.4rem; font-weight:900;">Entrenamiento Saber 11</h2>
+      <p style="font-size:0.8rem; color:var(--slate-600);">Selecciona tu curso e identifícate para ingresar</p>
+      <div class="protocol-tag" id="label-protocolo-activo">Cargando protocolo…</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Grado / Curso</label>
+      <select class="form-select" id="select-curso" onchange="filtrarEstudiantesPorCurso()">
+        <option value="">Seleccionar grado…</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Estudiante</label>
+      <select class="form-select" id="select-estudiante" onchange="validarFormLogin()" disabled>
+        <option value="">Primero selecciona tu grado…</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Sesión a Responder</label>
+      <select class="form-select" id="select-sesion" onchange="validarFormLogin()">
+        <option value="S1">Sesión 1 (Mañana)</option>
+        <option value="S2">Sesión 2 (Tarde)</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" id="btn-iniciar" onclick="solicitarAccesoEstudiante()" disabled>Continuar →</button>
+  </div>
+</div>
+
+<!-- 2. WELCOME -->
+<div id="screen-welcome" class="screen">
+  <div class="welcome-card">
+    <h2 style="font-size:1.5rem; font-weight:900; margin-bottom:1rem;">Instrucciones del Examen</h2>
+    <p style="color:var(--slate-600); font-size:0.85rem;">Por favor lee atentamente las condiciones antes de empezar:</p>
+    
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin:1.2rem 0; background:#f1f5f9; padding:1rem; border-radius:0.5rem;">
+      <div>Preguntas Totales: <strong id="welcome-total-questions" style="font-size:1.1rem; color:var(--primary); display:block;">0</strong></div>
+      <div>Tiempo Disponible: <strong id="welcome-total-time" style="font-size:1.1rem; color:var(--primary); display:block;">--</strong></div>
+    </div>
+
+    <div style="font-size:0.85rem; color:var(--slate-700); line-height:1.5; margin-bottom:1.5rem;">
+      <p>📌 <strong>Estructura de la prueba:</strong></p>
+      <ul id="welcome-area-list" style="margin-left:1.2rem; margin-top:0.3rem;"></ul>
+      <p style="margin-top:0.8rem; color:var(--red);">⚠️ <strong>Control de seguridad:</strong> Copiar, pegar, capturar pantalla o cambiar de pestaña generará bloqueos e infracciones directas.</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="iniciarExamenAhora()">Comenzar Prueba Ahora</button>
+  </div>
+</div>
+
+<!-- 3. MAIN EXAM SCREEN -->
+<div id="screen-answers" class="screen">
+  <div class="pdf-pane">
+    <iframe id="pdf-frame" src="about:blank"></iframe>
+  </div>
+
+  <div class="answers-pane">
+    <div class="exam-info-bar">
+      <div style="font-weight:900; font-size:0.7rem;" id="display-nombre">Estudiante</div>
+      <div style="font-size:0.6rem; opacity:0.8" id="display-info">Grado</div>
+      <div class="timer-badge" id="timer-display">⏱️ --:--</div>
+    </div>
+
+    <div class="area-tabs-vertical" id="area-tabs"></div>
+    <div class="answers-list" id="answers-list"></div>
+
+    <div style="padding:0.3rem; border-top:1px solid var(--slate-300);">
+      <button class="btn btn-danger" style="padding:0.4rem; font-size:0.7rem;" onclick="confirmarEntregaModal()">Finalizar Examen</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal-box" style="max-width:400px;">
+    <h3 style="margin-bottom:0.5rem;font-weight:900;" id="auth-modal-title">🔐 Autenticación</h3>
+    <p style="font-size:0.85rem;color:var(--slate-600);margin-bottom:1rem;" id="auth-modal-body"></p>
+    
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <input type="password" class="form-input" id="auth-input-pass" placeholder="Ingresa tu clave">
+    </div>
+
+    <div class="form-group" id="auth-confirm-group" style="display:none">
+      <label class="form-label">Confirmar Contraseña</label>
+      <input type="password" class="form-input" id="auth-input-pass-confirm" placeholder="Repite tu clave">
+    </div>
+
+    <div style="display:flex;gap:0.5rem;margin-top:1rem">
+      <button class="btn btn-outline" onclick="cerrarModal('modal-auth')">Cancelar</button>
+      <button class="btn btn-primary" onclick="ejecutarAutenticacion()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL CONSULTA INDIVIDUAL / DESCARGA REPORTE PDF -->
+<div class="modal-overlay" id="modal-consulta">
+  <div class="modal-box" style="max-width:650px;">
+    <h3 style="margin-bottom:0.8rem;font-weight:900;">📄 Consultar / Descargar Reporte Individual PDF</h3>
+    
+    <div id="consulta-login-step">
+      <div class="form-group">
+        <label class="form-label">Nombre de Estudiante</label>
+        <select class="form-select" id="consulta-select-est">
+          <option value="">Selecciona tu nombre...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" class="form-input" id="consulta-pass" placeholder="Tu clave registrada">
+      </div>
+      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-consulta')">Salir</button>
+        <button class="btn btn-primary" onclick="verificarYGenerarReporteIndividual()">Ver Mi Reporte</button>
+      </div>
+    </div>
+
+    <div id="consulta-result-step" style="display:none;">
+      <div id="contenedor-reporte-pdf">
+        <div class="report-header">
+          <h2 style="font-size:1.2rem; font-weight:900;">SABER TECH · INFRAESTRUCTURA EDUCATIVA</h2>
+          <p style="font-size:0.8rem; font-weight:700; color:var(--primary);">INFORME DE DESEMPEÑO SABER 11</p>
+          <p style="font-size:0.75rem; margin-top:0.3rem;" id="rep-pdf-estudiante">Estudiante: --</p>
+          <p style="font-size:0.65rem; color:var(--slate-600);" id="rep-pdf-id">ID VERIFICACIÓN: ST-XXXXXX-2026</p>
+        </div>
+
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#f1f5f9; padding:0.8rem; border-radius:0.5rem; margin-bottom:1rem;">
+          <div style="text-align:center;">
+            <span style="font-size:0.7rem; font-weight:800; color:var(--slate-600);">PUNTAJE GLOBAL PROYECTADO</span>
+            <div style="font-size:1.8rem; font-weight:900; color:var(--slate-900);" id="rep-pdf-global">0 / 500</div>
+          </div>
+          <div style="text-align:center;">
+            <span style="font-size:0.7rem; font-weight:800; color:var(--slate-600);">PERCENTIL NACIONAL</span>
+            <div style="font-size:1.8rem; font-weight:900; color:var(--primary);" id="rep-pdf-percentil">0%</div>
+          </div>
+        </div>
+
+        <div class="report-grid">
+          <div class="score-card">
+            <div class="score-card-title">Matemáticas</div>
+            <div class="score-card-value" id="rep-val-mat">0</div>
+            <span class="score-badge reforzar" id="rep-badge-mat">REFORZAR</span>
+          </div>
+          <div class="score-card">
+            <div class="score-card-title">Lectura Crítica</div>
+            <div class="score-card-value" id="rep-val-lec">0</div>
+            <span class="score-badge reforzar" id="rep-badge-lec">REFORZAR</span>
+          </div>
+          <div class="score-card">
+            <div class="score-card-title">C. Naturales</div>
+            <div class="score-card-value" id="rep-val-cn">0</div>
+            <span class="score-badge reforzar" id="rep-badge-cn">REFORZAR</span>
+          </div>
+          <div class="score-card">
+            <div class="score-card-title">Sociales</div>
+            <div class="score-card-value" id="rep-val-soc">0</div>
+            <span class="score-badge reforzar" id="rep-badge-soc">REFORZAR</span>
+          </div>
+          <div class="score-card">
+            <div class="score-card-title">Inglés</div>
+            <div class="score-card-value" id="rep-val-ing">0</div>
+            <span class="score-badge reforzar" id="rep-badge-ing">REFORZAR</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-consulta')">Cerrar</button>
+        <button class="btn btn-success" onclick="descargarReportePDFActual()">📄 Descargar PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL DOCENTE -->
+<div class="modal-overlay" id="modal-teacher">
+  <div class="modal-box">
+    <div style="display:flex; justify-style:space-between; align-items:center; margin-bottom:0.8rem;">
+      <h3 style="font-weight:900;">⚙️ Panel de Control Docente</h3>
+      <button id="btn-logout-teacher" class="btn btn-outline" style="width:auto; padding:0.3rem 0.6rem; font-size:0.75rem; display:none; background:#fee2e2; color:#b91c1c; border-color:#fca5a5;" onclick="cerrarSesionDocente()">🚪 Cerrar Sesión Docente</button>
+    </div>
+    
+    <!-- LOGIN PANEL DOCENTE CON DOS BOTONES (SALIR Y ACCEDER) -->
+    <div id="teacher-auth-step">
+      <div class="form-group">
+        <label class="form-label">Contraseña de Administrador</label>
+        <input type="password" class="form-input" id="teacher-pass-input" placeholder="Clave docente" onkeydown="if(event.key==='Enter') verificarDocente()">
+      </div>
+      <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-teacher')">Salir / Cancelar</button>
+        <button class="btn btn-primary" onclick="verificarDocente()">Acceder al Panel</button>
+      </div>
+    </div>
+
+    <div id="teacher-controls-step" style="display:none;">
+      <div class="teacher-tabs">
+        <div class="t-tab active" onclick="switchTeacherTab('tab-general', this)">General & Tiempos</div>
+        <div class="t-tab" onclick="switchTeacherTab('tab-preguntas', this)">Preguntas & Áreas</div>
+        <div class="t-tab" onclick="switchTeacherTab('tab-ingles', this); renderizarConfiguracionIngles();">Formatos Inglés</div>
+        <div class="t-tab" onclick="switchTeacherTab('tab-reportes', this); cargarReportesDocente();">Informes & Infracciones</div>
+      </div>
+
+      <div id="tab-general" class="t-content">
+        <div class="form-group">
+          <label class="form-label">Protocolo Activo</label>
+          <select class="form-select" id="cfg-protocolo">
+            <option value="Protocolo 01">Protocolo 01</option>
+            <option value="Protocolo 02">Protocolo 02</option>
+            <option value="Protocolo 03">Protocolo 03</option>
+            <option value="Protocolo 04">Protocolo 04</option>
+            <option value="Protocolo 05">Protocolo 05</option>
+          </select>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Horas por Sesión</label>
+            <input type="number" class="form-input" id="cfg-horas" value="4" min="0" max="8">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Minutos Adicionales</label>
+            <input type="number" class="form-input" id="cfg-minutos" value="30" min="0" max="59">
+          </div>
+        </div>
+
+        <!-- Habilitación manual de botón de descarga de reporte -->
+        <div class="form-group" style="background: #f1f5f9; padding: 0.8rem; border-radius: 0.5rem; border: 1px solid var(--slate-300);">
+          <label class="form-label" style="margin-bottom:0.2rem;">Habilitación de Reportes Estudiantiles</label>
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.3rem;">
+            <input type="checkbox" id="cfg-habilitar-reportes" style="width: 18px; height: 18px; cursor: pointer;">
+            <label for="cfg-habilitar-reportes" style="font-size: 0.8rem; font-weight:700; cursor: pointer;">
+              Permitir a los estudiantes descargar / consultar su informe PDF
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-preguntas" class="t-content" style="display:none;">
+        <p style="font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">SESIÓN 1</p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:0.5rem; margin-bottom:1rem;">
+          <div><label class="form-label">Matemáticas 1</label><input type="number" class="form-input" id="cfg-s1-mat" value="25"></div>
+          <div><label class="form-label">Lectura Crítica</label><input type="number" class="form-input" id="cfg-s1-lec" value="41"></div>
+          <div><label class="form-label">Sociales 1</label><input type="number" class="form-input" id="cfg-s1-soc" value="25"></div>
+          <div><label class="form-label">Ciencias 1</label><input type="number" class="form-input" id="cfg-s1-cn" value="29"></div>
+        </div>
+
+        <p style="font-size:0.75rem; font-weight:800; margin-bottom:0.5rem; color:var(--primary);">SESIÓN 2 (Llega exactamente hasta P124)</p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:0.5rem;">
+          <div><label class="form-label">Sociales 2</label><input type="number" class="form-input" id="cfg-s2-soc" value="25"></div>
+          <div><label class="form-label">Matemáticas 2</label><input type="number" class="form-input" id="cfg-s2-mat" value="25"></div>
+          <div><label class="form-label">Ciencias 2</label><input type="number" class="form-input" id="cfg-s2-cn" value="29"></div>
+          <div><label class="form-label">Inglés</label><input type="number" class="form-input" id="cfg-s2-ing" value="45" onchange="renderizarConfiguracionIngles()"></div>
+        </div>
+      </div>
+
+      <div id="tab-ingles" class="t-content" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+          <p style="font-size:0.75rem; font-weight:800;">Formato por Pregunta de Inglés:</p>
+          <div style="display:flex; gap:0.3rem; align-items:center;">
+            <span style="font-size:0.65rem;">Aplicar a todas:</span>
+            <select class="form-select" id="apply-all-ingles" style="width:auto; padding:0.2rem; font-size:0.7rem;" onchange="aplicarFormatoMasivoIngles(this.value)">
+              <option value="">Seleccionar...</option>
+              <option value="A,B,C">A, B, C (3 Opciones)</option>
+              <option value="A,B,C,D">A, B, C, D (4 Opciones)</option>
+              <option value="A,B,C,D,E">A, B, C, D, E (5 Opciones)</option>
+              <option value="A,B,C,D,E,F,G,H">A a H (8 Opciones)</option>
+            </select>
+          </div>
+        </div>
+        <div class="ingles-grid" id="ingles-questions-grid"></div>
+      </div>
+
+      <div id="tab-reportes" class="t-content" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+          <p style="font-size:0.8rem; font-weight:800;">Respuestas Registradas</p>
+          <button class="btn btn-success" style="width:auto; padding:0.3rem 0.6rem; font-size:0.75rem;" onclick="descargarInformeExcel()">📊 Descargar Informe General CSV</button>
+        </div>
+        
+        <div style="max-height:130px; overflow-y:auto; margin-bottom:1rem;">
+          <table id="tbl-respuestas">
+            <thead><tr><th>Fecha</th><th>Estudiante</th><th>Grado</th><th>Sesión</th><th>Respondidas</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <p style="font-size:0.8rem; font-weight:800; color:var(--red);">Monitoreo de Infracciones</p>
+        <div style="max-height:130px; overflow-y:auto;">
+          <table id="tbl-infracciones">
+            <thead><tr><th>Fecha</th><th>Estudiante</th><th>Infracciones</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-top:1.2rem">
+        <button class="btn btn-outline" onclick="cerrarModal('modal-teacher')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarConfiguracionDocente()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRMATION MODAL -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-box" style="max-width:420px;">
+    <h3 style="margin-bottom:0.5rem;font-weight:900;">⚠️ Confirmar Envío</h3>
+    <div id="confirm-stats-body" style="font-size:0.85rem; margin:1rem 0; background:#f8fafc; padding:0.8rem; border-radius:0.5rem; border:1px solid var(--slate-300);"></div>
+    <p style="font-weight:800; color:var(--red); font-size:0.8rem; margin-bottom:1rem;">¿Desea enviar las respuestas? Se descargará automáticamente una copia en .txt de sus respuestas.</p>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="btn btn-outline" onclick="cerrarModal('modal-confirm')">Seguir Respondiendo</button>
+      <button class="btn btn-danger" id="btn-final-send" onclick="finalizarExamen()">Sí, Enviar Examen</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT MODAL (RESUMEN POST-ENTREGA) -->
+<div class="modal-overlay" id="modal-report">
+  <div class="modal-box" style="max-width:480px;">
+    <h3 style="margin-bottom:0.5rem;font-weight:900;">📋 Resumen de Entrega Exitosa</h3>
+    <div id="report-content" style="font-size:0.85rem; line-height:1.5; margin-bottom:1rem;"></div>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="btn btn-primary" onclick="cerrarReporteYSalir()">Aceptar y Salir</button>
+      <button class="btn btn-success" onclick="descargarRespaldoTXTManualmente()">📄 Descargar TXT Manual</button>
+    </div>
   </div>
 </div>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec'; 
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyZ9ufm0LV6H4LwKMh7FzoHI4-WGP9AonGVJjsYX2N0Nr8AeYO32Evu0C2FCyy5euPYRQ/exec';
 
-  let globalData = {
-    estudiantes: [],
-    claves: {},
-    estudianteActual: null,
-    gradoActual: '',
-    protocolo: '',
-    sesion: '',
-    advertencias: 0,
-    respuestasGuardadas: {}
-  };
+const PDF_FILES = {
+  S1: '2026-2-sesion-1-compressed.pdf',
+  S2: '2026-2-sesion-2-compressed.pdf'
+};
 
-  window.onload = function() {
-    cargarDatosIniciales();
-    configurarControlInfracciones();
-  };
+let STATE = { 
+  estudiantes: [], 
+  est: null, 
+  claves: {}, 
+  respuestas: {},
+  warnings: 0,
+  examActive: false,
+  warningTimeout: null,
+  lastWarningTime: 0,
+  config: {
+    protocoloActivo: 'Protocolo 01',
+    horas: 4,
+    minutos: 30,
+    habilitarReportes: false,
+    s1: { mat: 25, lec: 41, soc: 25, cn: 29 },
+    s2: { soc: 25, mat: 25, cn: 29, ing: 45 },
+    inglesMap: {}
+  },
+  timerInterval: null,
+  timeRemaining: 0,
+  isSyncing: false
+};
 
-  function cargarDatosIniciales() {
-    mostrarAlerta('Cargando datos del sistema...', 'info');
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?action=getInit&callback=procesarInit`;
-    document.body.appendChild(script);
-  }
+window.addEventListener('DOMContentLoaded', async () => {
+  initNetworkMonitoring();
+  await cargarEstudiantes();
+  initAntiCheating();
+});
 
-  function procesarInit(response) {
-    if (response.success) {
-      globalData.estudiantes = response.estudiantes;
-      globalData.claves = response.claves;
-      
-      const select = document.getElementById('select-estudiante');
-      select.innerHTML = '<option value="">-- Selecciona un estudiante --</option>';
-      
-      response.estudiantes.forEach(est => {
-        const opt = document.createElement('option');
-        opt.value = est.nombre;
-        opt.textContent = `${est.nombre} (${est.grado})`;
-        opt.dataset.grado = est.grado;
-        select.appendChild(opt);
-      });
-      ocultarAlerta();
+/* ======================================================
+   CAPA BATCH SINK & RESILENCIA SIN CELDAS EN BLANCO
+====================================================== */
+
+function initNetworkMonitoring() {
+  const badge = document.getElementById('net-status-badge');
+  function updateStatus() {
+    if (navigator.onLine) {
+      badge.textContent = '● En línea';
+      badge.className = 'net-status online';
+      sincronizarLoteProcesado();
     } else {
-      mostrarAlerta('Error cargando lista de estudiantes: ' + response.error, 'danger');
+      badge.textContent = '▲ Sin Conexión (Modo Offline)';
+      badge.className = 'net-status offline';
     }
   }
+  window.addEventListener('online', updateStatus);
+  window.addEventListener('offline', updateStatus);
+  updateStatus();
+}
 
-  function guardarRespuestaIndividual(numPregunta, opcion) {
-    globalData.respuestasGuardadas[`P${numPregunta}`] = opcion;
+function guardarRespuestaLocal(qKey, opcion) {
+  if (!STATE.est) return;
+  const sesion = document.getElementById('select-sesion').value;
+  const storageKey = `EXAM_${STATE.est.nombre}_${sesion}`;
+  const localData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+  localData[qKey] = opcion;
+  localStorage.setItem(storageKey, JSON.stringify(localData));
+}
 
-    const payload = {
-      action: 'guardarRespuesta',
-      estudiante: globalData.estudianteActual,
-      grado: globalData.gradoActual,
-      protocolo: globalData.protocolo,
-      sesion: globalData.sesion,
-      pregunta: `P${numPregunta}`,
-      respuesta: opcion
-    };
+function recuperarRespuestasLocales() {
+  if (!STATE.est) return;
+  const sesion = document.getElementById('select-sesion').value;
+  const storageKey = `EXAM_${STATE.est.nombre}_${sesion}`;
+  const localData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+  STATE.respuestas = { ...localData };
+}
 
-    fetch(SCRIPT_URL, {
+async function sincronizarLoteProcesado() {
+  if (!navigator.onLine || STATE.isSyncing || !STATE.est) return false;
+  
+  const sesion = document.getElementById('select-sesion').value;
+  const storageKey = `EXAM_${STATE.est.nombre}_${sesion}`;
+  const respuestasLocales = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+  if (Object.keys(respuestasLocales).length === 0) return true;
+
+  STATE.isSyncing = true;
+
+  const payload = {
+    action: 'guardarLoteRespuestas',
+    estudiante: STATE.est.nombre,
+    grado: STATE.est.grado,
+    protocolo: STATE.config.protocoloActivo,
+    sesion: sesion,
+    respuestas: respuestasLocales,
+    advertencias: STATE.warnings
+  };
+
+  try {
+    const resp = await fetch(GAS_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    }).then(() => {
-      console.log(`Guardada P${numPregunta} = ${opcion}`);
-    }).catch(err => console.error('Error al guardar respuesta:', err));
-  }
-
-  function registrarInfraccionBackend() {
-    globalData.advertencias++;
-    document.getElementById('badge-advertencias').textContent = `Infracciones: ${globalData.advertencias}`;
-
-    const payload = {
-      action: 'registrarInfraccion',
-      estudiante: globalData.estudianteActual,
-      advertencias: globalData.advertencias
-    };
-
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
-    
-    alert(`¡ADVERTENCIA! Has salido de la pantalla del examen. Esta infracción ha sido registrada (${globalData.advertencias}).`);
-  }
-
-  function configurarControlInfracciones() {
-    window.addEventListener('blur', () => {
-      if (!document.getElementById('view-examen').classList.contains('hidden')) {
-        registrarInfraccionBackend();
-      }
-    });
-  }
-
-  function iniciarExamen() {
-    const select = document.getElementById('select-estudiante');
-    const estNombre = select.value;
-    const claveIngresada = document.getElementById('input-clave').value.trim();
-    
-    if (!estNombre) {
-      alert('Selecciona un estudiante.');
-      return;
+    const data = await resp.json();
+    if (data && data.success) {
+      STATE.isSyncing = false;
+      return true;
     }
-
-    if (globalData.claves[estNombre] && globalData.claves[estNombre] !== claveIngresada) {
-      alert('Clave de acceso incorrecta para este estudiante.');
-      return;
-    }
-
-    const selectedOpt = select.options[select.selectedIndex];
-    globalData.estudianteActual = estNombre;
-    globalData.gradoActual = selectedOpt.dataset.grado || '';
-    globalData.protocolo = document.getElementById('input-protocolo').value.trim() || 'SABER-11';
-    globalData.sesion = document.getElementById('select-sesion').value;
-
-    document.getElementById('estudiante-info').textContent = `${globalData.estudianteActual} (${globalData.gradoActual})`;
-    
-    // Asignar el enlace del PDF (Reemplazar la URL con el cuadernillo que corresponda)
-    document.getElementById('pdf-viewer').src = "https://drive.google.com/file/d/1_EXAMEN_PDF_EJEMPLO/preview"; 
-    
-    generarHojaRespuestas(30);
-    
-    document.getElementById('view-login').classList.add('hidden');
-    document.getElementById('view-examen').classList.remove('hidden');
-  }
-
-  function generarHojaRespuestas(totalPreguntas) {
-    const container = document.getElementById('preguntas-container');
-    container.innerHTML = '';
-
-    for (let i = 1; i <= totalPreguntas; i++) {
-      const qBox = document.createElement('div');
-      qBox.className = 'question-box';
-      
-      const title = document.createElement('p');
-      title.innerHTML = `<strong>Pregunta ${i}</strong>`;
-      qBox.appendChild(title);
-
-      const optGrid = document.createElement('div');
-      optGrid.className = 'options-grid';
-
-      ['A', 'B', 'C', 'D'].forEach(opcion => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'opt-btn';
-        btn.textContent = opcion;
-        btn.onclick = function() {
-          optGrid.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          guardarRespuestaIndividual(i, opcion);
-        };
-        optGrid.appendChild(btn);
-      });
-
-      qBox.appendChild(optGrid);
-      container.appendChild(qBox);
-    }
-  }
-
-  function finalizarExamen() {
-    if (confirm('¿Estás seguro de que deseas finalizar el examen?')) {
-      alert('Respuestas registradas exitosamente. Puedes cerrar la ventana.');
-      location.reload();
-    }
-  }
-
-  // LÓGICA LOGIN DOCENTE
-  function abrirModalDocente() { 
-    document.getElementById('input-teacher-pass').value = '';
-    document.getElementById('modal-docente').classList.remove('hidden'); 
+  } catch(e) {
+    console.error("Error en batch sync:", e);
   }
   
-  function cerrarModalDocente() { 
-    document.getElementById('modal-docente').classList.add('hidden'); 
+  STATE.isSyncing = false;
+  return false;
+}
+
+/* ======================================================
+   GENERACIÓN DE ARCHIVO TXT MANUAL DE RESPALDO
+====================================================== */
+
+function generarYDescargarTXTRespaldo() {
+  if (!STATE.est) return;
+
+  const sesion = document.getElementById('select-sesion').value;
+  const fecha = new Date().toLocaleString('es-CO');
+  
+  let txtContent = `====================================================\n`;
+  txtContent += `      SABER TECH - RESPALDO DE SEGURIDAD MANUAL      \n`;
+  txtContent += `====================================================\n\n`;
+  txtContent += `ESTUDIANTE:  ${STATE.est.nombre}\n`;
+  txtContent += `CURSO:       ${STATE.est.grado}\n`;
+  txtContent += `SESIÓN:      ${sesion}\n`;
+  txtContent += `PROTOCOLO:   ${STATE.config.protocoloActivo}\n`;
+  txtContent += `FECHA:       ${fecha}\n`;
+  txtContent += `INFRACCIONES:${STATE.warnings}\n`;
+  txtContent += `----------------------------------------------------\n`;
+  txtContent += `DESGLOSE DE RESPUESTAS REGISTRADAS:\n`;
+  txtContent += `----------------------------------------------------\n\n`;
+
+  const total = obtenerTotalPreguntasSesion();
+  let respondidas = 0;
+
+  for (let i = 1; i <= total; i++) {
+    const qKey = `P${i}`;
+    const ans = STATE.respuestas[qKey] || 'SIN RESPONDER';
+    if (STATE.respuestas[qKey]) respondidas++;
+    txtContent += `${qKey.padEnd(6, ' ')} : ${ans}\n`;
   }
 
-  function loginDocente() {
-    const pass = document.getElementById('input-teacher-pass').value;
-    mostrarAlerta('Verificando contraseña...', 'info');
+  txtContent += `\n----------------------------------------------------\n`;
+  txtContent += `TOTAL RESPONDIDAS: ${respondidas} de ${total}\n`;
+  txtContent += `====================================================\n`;
 
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?action=getReportes&callback=procesarLoginDocente`; 
-    document.body.appendChild(script);
-  }
+  const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `Respaldo_SABER11_${STATE.est.nombre.replace(/\s+/g, '_')}_${sesion}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 
-  function procesarLoginDocente(resp) {
-    const pass = document.getElementById('input-teacher-pass').value;
-    if (pass === 'saber2026') { 
-      cerrarModalDocente();
-      ocultarAlerta();
-      document.getElementById('view-login').classList.add('hidden');
-      document.getElementById('view-docente').classList.remove('hidden');
-      if(resp && resp.success) {
-        document.getElementById('reportes-output').textContent = JSON.stringify(resp, null, 2);
+function descargarRespaldoTXTManualmente() {
+  generarYDescargarTXTRespaldo();
+}
+
+/* ======================================================
+   CÓDIGO PRINCIPAL PLATAFORMA
+====================================================== */
+
+async function cargarEstudiantes(){
+  try {
+    const r = await fetch(GAS_URL + '?action=getInit');
+    const data = await r.json();
+    if(data.success){
+      STATE.estudiantes = data.estudiantes || [];
+      STATE.claves = data.claves || {};
+      if(data.config && Object.keys(data.config).length > 0) {
+        parseConfigFromBackend(data.config);
       }
+    }
+  } catch(e) { console.error(e); }
+  finally {
+    document.getElementById('loading-overlay').style.display = 'none';
+    document.getElementById('label-protocolo-activo').textContent = STATE.config.protocoloActivo;
+    actualizarEstadoBotonReporte();
+    poblarCursos();
+    poblarListaConsultaEstudiantes();
+  }
+}
+
+function parseConfigFromBackend(cfg){
+  if(cfg.protocoloActivo) STATE.config.protocoloActivo = cfg.protocoloActivo;
+  if(cfg.horas) STATE.config.horas = parseInt(cfg.horas);
+  if(cfg.minutos) STATE.config.minutos = parseInt(cfg.minutos);
+  if(cfg.habilitarReportes !== undefined) STATE.config.habilitarReportes = (cfg.habilitarReportes === true || cfg.habilitarReportes === 'true');
+  if(cfg.s1) STATE.config.s1 = typeof cfg.s1 === 'string' ? JSON.parse(cfg.s1) : cfg.s1;
+  if(cfg.s2) STATE.config.s2 = typeof cfg.s2 === 'string' ? JSON.parse(cfg.s2) : cfg.s2;
+  if(cfg.inglesMap) STATE.config.inglesMap = typeof cfg.inglesMap === 'string' ? JSON.parse(cfg.inglesMap) : cfg.inglesMap;
+}
+
+function actualizarEstadoBotonReporte(){
+  const btn = document.getElementById('btn-topbar-reporte');
+  if(STATE.config.habilitarReportes) {
+    btn.disabled = false;
+    btn.title = "Consultar y descargar reporte PDF";
+  } else {
+    btn.disabled = true;
+    btn.title = "Los reportes estarán disponibles una vez sean habilitados por el docente";
+  }
+}
+
+/*
+  Ajuste de Estructura de Sesiones:
+  - Sesión 2: Sociales(25) + Mat(25) + Ciencias(29) + Inglés(45) = 124 preguntas en total.
+*/
+function obtenerEstructuraSesiones(){
+  const s2InglesCount = STATE.config.s2.ing; // Default: 45
+  const s2OffsetIngles = STATE.config.s2.soc + STATE.config.s2.mat + STATE.config.s2.cn; // 25 + 25 + 29 = 79
+
+  return {
+    S1: [
+      { area: "Matemáticas 1", preg: STATE.config.s1.mat, offset: 0, opts: ['A','B','C','D'] },
+      { area: "Lectura Crítica", preg: STATE.config.s1.lec, offset: STATE.config.s1.mat, opts: ['A','B','C','D'] },
+      { area: "Sociales 1", preg: STATE.config.s1.soc, offset: STATE.config.s1.mat + STATE.config.s1.lec, opts: ['A','B','C','D'] },
+      { area: "Ciencias 1", preg: STATE.config.s1.cn, offset: STATE.config.s1.mat + STATE.config.s1.lec + STATE.config.s1.soc, opts: ['A','B','C','D'] }
+    ],
+    S2: [
+      { area: "Sociales 2", preg: STATE.config.s2.soc, offset: 0, opts: ['A','B','C','D'] },
+      { area: "Matemáticas 2", preg: STATE.config.s2.mat, offset: STATE.config.s2.soc, opts: ['A','B','C','D'] },
+      { area: "Ciencias 2", preg: STATE.config.s2.cn, offset: STATE.config.s2.soc + STATE.config.s2.mat, opts: ['A','B','C','D'] },
+      { area: "Inglés", preg: s2InglesCount, offset: s2OffsetIngles, isIngles: true }
+    ]
+  };
+}
+
+function poblarCursos(){
+  const byCurso = {};
+  STATE.estudiantes.forEach(e => {
+    const g = e.grado || 'GENERAL';
+    if(!byCurso[g]) byCurso[g] = [];
+    byCurso[g].push(e);
+  });
+  STATE._byCurso = byCurso;
+
+  const selCurso = document.getElementById('select-curso');
+  selCurso.innerHTML = '<option value="">Seleccionar grado…</option>';
+  Object.keys(byCurso).sort().forEach(g => {
+    selCurso.appendChild(new Option(`Grado ${g}`, g));
+  });
+}
+
+function poblarListaConsultaEstudiantes(){
+  const sel = document.getElementById('consulta-select-est');
+  sel.innerHTML = '<option value="">Selecciona tu nombre...</option>';
+  STATE.estudiantes.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach(e => {
+    sel.appendChild(new Option(`${e.nombre} (${e.grado})`, e.nombre));
+  });
+}
+
+function filtrarEstudiantesPorCurso(){
+  const curso = document.getElementById('select-curso').value;
+  const selEst = document.getElementById('select-estudiante');
+  selEst.innerHTML = '<option value="">Seleccionar estudiante…</option>';
+  
+  if(!curso || !STATE._byCurso[curso]){
+    selEst.disabled = true;
+    validarFormLogin();
+    return;
+  }
+
+  STATE._byCurso[curso].sort((a,b)=>a.nombre.localeCompare(b.nombre)).forEach((e, i) => {
+    selEst.appendChild(new Option(e.nombre, i));
+  });
+  selEst.disabled = false;
+  validarFormLogin();
+}
+
+function validarFormLogin(){
+  const c = document.getElementById('select-curso').value;
+  const e = document.getElementById('select-estudiante').value;
+  const s = document.getElementById('select-sesion').value;
+  document.getElementById('btn-iniciar').disabled = !(c && e !== "" && s);
+}
+
+function solicitarAccesoEstudiante(){
+  const curso = document.getElementById('select-curso').value;
+  const idx = document.getElementById('select-estudiante').value;
+  STATE.est = STATE._byCurso[curso][parseInt(idx)];
+  
+  const claveGuardada = STATE.claves[STATE.est.nombre];
+  document.getElementById('auth-input-pass').value = '';
+  document.getElementById('auth-input-pass-confirm').value = '';
+
+  if(!claveGuardada){
+    document.getElementById('auth-modal-title').textContent = '🔑 Crear Contraseña';
+    document.getElementById('auth-modal-body').textContent = `Estudiante: ${STATE.est.nombre}. Crea tu clave personal.`;
+    document.getElementById('auth-confirm-group').style.display = 'block';
+  } else {
+    document.getElementById('auth-modal-title').textContent = '🔐 Contraseña Requerida';
+    document.getElementById('auth-modal-body').textContent = `Ingresa tu clave para continuar, ${STATE.est.nombre}.`;
+    document.getElementById('auth-confirm-group').style.display = 'none';
+  }
+
+  document.getElementById('modal-auth').classList.add('open');
+}
+
+async function ejecutarAutenticacion(){
+  const pass = document.getElementById('auth-input-pass').value.trim();
+  const nombre = STATE.est.nombre;
+  const claveGuardada = STATE.claves[nombre];
+
+  if(!claveGuardada){
+    const confirm = document.getElementById('auth-input-pass-confirm').value.trim();
+    if(pass.length < 4){ showToast('La clave debe tener mínimo 4 caracteres', 'error'); return; }
+    if(pass !== confirm){ showToast('Las contraseñas NO coinciden', 'error'); return; }
+
+    try {
+      const resp = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'registrarClave', estudiante: nombre, clave: pass })
+      });
+      const data = await resp.json();
+      if(data.success) {
+        STATE.claves[nombre] = pass;
+        cerrarModal('modal-auth');
+        mostrarPantallaBienvenida();
+      }
+    } catch(e) { showToast('Error al guardar clave', 'error'); }
+  } else {
+    if(claveGuardada === pass){
+      cerrarModal('modal-auth');
+      mostrarPantallaBienvenida();
     } else {
-      mostrarAlerta('Contraseña docente incorrecta', 'danger');
+      showToast('Contraseña incorrecta', 'error');
+    }
+  }
+}
+
+function mostrarPantallaBienvenida(){
+  mostrarScreen('screen-welcome');
+  const sesion = document.getElementById('select-sesion').value;
+  const struct = obtenerEstructuraSesiones()[sesion];
+  
+  let totalPreguntas = 0;
+  const listEl = document.getElementById('welcome-area-list');
+  listEl.innerHTML = '';
+  
+  struct.forEach(a => {
+    totalPreguntas += a.preg;
+    const li = document.createElement('li');
+    li.textContent = `${a.area}: ${a.preg} preguntas`;
+    listEl.appendChild(li);
+  });
+
+  const totalMin = (STATE.config.horas * 60) + STATE.config.minutos;
+  document.getElementById('welcome-total-questions').textContent = totalPreguntas;
+  document.getElementById('welcome-total-time').textContent = `${STATE.config.horas}h ${STATE.config.minutos}m (${totalMin} min)`;
+}
+
+function iniciarExamenAhora(){
+  mostrarScreen('screen-answers');
+  STATE.examActive = true;
+  STATE.warnings = 0;
+  
+  recuperarRespuestasLocales();
+  
+  const sesion = document.getElementById('select-sesion').value;
+  document.getElementById('display-nombre').textContent = STATE.est.nombre;
+  document.getElementById('display-info').textContent = `${STATE.est.grado} · ${sesion}`;
+  
+  const pdfArchivo = PDF_FILES[sesion] || '2026-2-sesion-1-compressed.pdf';
+  document.getElementById('pdf-frame').src = `./${pdfArchivo}#toolbar=0&navpanes=0`;
+
+  renderizarAreas(sesion);
+  const totalMin = (STATE.config.horas * 60) + STATE.config.minutos;
+  iniciarTemporizador(totalMin * 60);
+}
+
+function iniciarTemporizador(segundos){
+  STATE.timeRemaining = segundos;
+  clearInterval(STATE.timerInterval);
+  STATE.timerInterval = setInterval(() => {
+    STATE.timeRemaining--;
+    const h = Math.floor(STATE.timeRemaining / 3600);
+    const m = Math.floor((STATE.timeRemaining % 3600) / 60);
+    const s = STATE.timeRemaining % 60;
+    document.getElementById('timer-display').textContent = `⏱️ ${h > 0 ? h + ':' : ''}${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    if(STATE.timeRemaining <= 0){
+      clearInterval(STATE.timerInterval);
+      finalizarExamen();
+    }
+  }, 1000);
+}
+
+function renderizarAreas(sesionKey){
+  const areas = obtenerEstructuraSesiones()[sesionKey];
+  const tabsContainer = document.getElementById('area-tabs');
+  tabsContainer.innerHTML = '';
+
+  areas.forEach((item, index) => {
+    const btn = document.createElement('button');
+    btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+    btn.textContent = `${item.area}`;
+    btn.onclick = () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      cargarPreguntasArea(item);
+    };
+    tabsContainer.appendChild(btn);
+  });
+
+  cargarPreguntasArea(areas[0]);
+}
+
+function cargarPreguntasArea(itemArea){
+  const list = document.getElementById('answers-list');
+  list.innerHTML = '';
+
+  for(let i = 1; i <= itemArea.preg; i++){
+    const pregGlobalNum = itemArea.offset + i;
+    const qKey = `P${pregGlobalNum}`;
+    
+    const labelTexto = itemArea.isIngles ? `P${pregGlobalNum} (${i})` : `P${pregGlobalNum}`;
+
+    let opciones = itemArea.opts || ['A','B','C','D'];
+    if(itemArea.isIngles) {
+      opciones = STATE.config.inglesMap[qKey] || ['A','B','C','D'];
+    }
+
+    const row = document.createElement('div');
+    row.className = 'q-row-line';
+    row.innerHTML = `
+      <div class="q-num-inline">${labelTexto}</div>
+      <div class="q-opts-inline">
+        ${opciones.map(opt => `
+          <div class="opt-bubble ${STATE.respuestas[qKey] === opt ? 'selected' : ''}" 
+               onclick="marcarYGuardarRespuesta('${qKey}', '${opt}', this)">${opt}</div>
+        `).join('')}
+      </div>
+    `;
+    list.appendChild(row);
+  }
+}
+
+function marcarYGuardarRespuesta(qKey, opcion, el){
+  STATE.respuestas[qKey] = opcion;
+  const parent = el.parentElement;
+  parent.querySelectorAll('.opt-bubble').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+
+  guardarRespuestaLocal(qKey, opcion);
+}
+
+function obtenerTotalPreguntasSesion(){
+  const sesion = document.getElementById('select-sesion').value;
+  return obtenerEstructuraSesiones()[sesion].reduce((acc, a) => acc + a.preg, 0);
+}
+
+function confirmarEntregaModal(){
+  const respondidas = Object.keys(STATE.respuestas).length;
+  const total = obtenerTotalPreguntasSesion();
+  const sinResponder = total - respondidas;
+
+  const html = `
+    <p>📝 <strong>Preguntas Respondidas:</strong> ${respondidas}</p>
+    <p>❓ <strong>Sin Responder:</strong> ${sinResponder}</p>
+    <p>📊 <strong>Total Preguntas:</strong> ${total}</p>
+  `;
+
+  document.getElementById('confirm-stats-body').innerHTML = html;
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+async function finalizarExamen(){
+  cerrarModal('modal-confirm');
+  
+  document.getElementById('sync-modal').classList.add('active');
+
+  let exitoNube = false;
+  let reintentos = 0;
+
+  while(!exitoNube && reintentos < 5) {
+    if (navigator.onLine) {
+      exitoNube = await sincronizarLoteProcesado();
+    }
+    if (!exitoNube) {
+      reintentos++;
+      await new Promise(r => setTimeout(r, 1500));
     }
   }
 
-  function cargarReportes() {
-    document.getElementById('reportes-output').textContent = "Cargando reportes...";
-    const script = document.createElement('script');
-    script.src = `${SCRIPT_URL}?action=getReportes&callback=mostrarReportes`;
-    document.body.appendChild(script);
-  }
+  generarYDescargarTXTRespaldo();
 
-  function mostrarReportes(resp) {
-    if (resp.success) {
-      document.getElementById('reportes-output').textContent = JSON.stringify(resp, null, 2);
-    } else {
-      document.getElementById('reportes-output').textContent = "Error: " + resp.error;
+  document.getElementById('sync-modal').classList.remove('active');
+  clearInterval(STATE.timerInterval);
+  STATE.examActive = false;
+  
+  const respondidas = Object.keys(STATE.respuestas).length;
+  const total = obtenerTotalPreguntasSesion();
+
+  const msgEstado = exitoNube 
+    ? `<p style="color:var(--green); font-weight:800; margin-top:0.8rem;">✅ Examen sincronizado sin pérdidas en Google Sheets y respaldado en archivo TXT.</p>`
+    : `<p style="color:var(--yellow); font-weight:800; margin-top:0.3rem;">⚠️ Falló la conexión con la nube. Se ha descargado un respaldo .TXT en su dispositivo con sus respuestas.</p>`;
+
+  const html = `
+    <p><strong>Estudiante:</strong> ${STATE.est.nombre}</p>
+    <p><strong>Respuestas Completadas:</strong> ${respondidas} de ${total}</p>
+    <p style="color:${STATE.warnings > 0 ? 'var(--red)' : 'var(--green)'}; font-weight:800; margin-top:0.3rem;">
+      <strong>Infracciones Detectadas:</strong> ${STATE.warnings}
+    </p>
+    ${msgEstado}
+  `;
+
+  document.getElementById('report-content').innerHTML = html;
+  document.getElementById('modal-report').classList.add('open');
+}
+
+/* ======================================================
+   SISTEMA DE CONTROL DE INFRACCIONES
+====================================================== */
+
+function triggerWarning(msg) {
+  if(!STATE.examActive) return;
+
+  const now = Date.now();
+  if (now - STATE.lastWarningTime < 2500) {
+    return;
+  }
+  STATE.lastWarningTime = now;
+
+  STATE.warnings++;
+  
+  const modal = document.getElementById('center-warning-modal');
+  document.getElementById('warning-msg-text').textContent = msg;
+  modal.classList.add('active');
+
+  if(STATE.warningTimeout) clearTimeout(STATE.warningTimeout);
+  STATE.warningTimeout = setTimeout(() => {
+    modal.classList.remove('active');
+  }, 3000);
+}
+
+function initAntiCheating(){
+  // 1. Detección por cambio de pestaña o minimización de ventana
+  window.addEventListener('blur', () => triggerWarning("Intento de abandono de pantalla / cambio de pestaña."));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) triggerWarning("Ventana minimizada o fuera de foco.");
+  });
+
+  // 2. Detección de intento de impresión de pantalla
+  window.addEventListener('beforeprint', () => {
+    triggerWarning("Intento de impresión del examen detectado");
+  });
+
+  // 3. SIN WARNING POR CLIC SENCILLO: Se activa ÚNICAMENTE si se selecciona y arrastra un fragmento largo de texto
+  document.addEventListener('selectionchange', () => {
+    if(!STATE.examActive) return;
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim().length > 5) {
+      triggerWarning("Intento de selección y arrastre de texto no permitido");
+      selection.removeAllRanges();
     }
+  });
+
+  // 4. Teclas prohibidas (PrintScreen, Ctrl+C, Ctrl+V, F12)
+  document.addEventListener('keydown', (e) => {
+    if(!STATE.examActive) return;
+
+    if (e.key === 'PrintScreen' || e.keyCode === 44) {
+      triggerWarning("Intento de captura de pantalla detectado (PrintScreen)");
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey || e.metaKey) {
+      const k = e.key.toLowerCase();
+      if (['c', 'v', 'x', 'a', 'p', 'u', 's'].includes(k)) { 
+        triggerWarning(`Acción no permitida (Ctrl + ${k.toUpperCase()})`); 
+        e.preventDefault(); 
+      }
+    }
+
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i', 'j'].includes(e.key.toLowerCase()))) {
+      triggerWarning("Acción bloqueada: Acceso a Herramientas de Desarrollo");
+      e.preventDefault();
+    }
+  });
+
+  // 5. Eventos de portapapeles
+  document.addEventListener('copy', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Copiar texto"); e.preventDefault(); } });
+  document.addEventListener('paste', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Pegar texto"); e.preventDefault(); } });
+  document.addEventListener('cut', (e) => { if(STATE.examActive) { triggerWarning("Acción bloqueada: Cortar texto"); e.preventDefault(); } });
+}
+
+/* ======================================================
+   REPORTE INDIVIDUAL Y DESCARGA EN PDF
+====================================================== */
+
+function abrirModalConsultaEstudiante(){
+  if(!STATE.config.habilitarReportes) {
+    showToast('La descarga de reportes no ha sido habilitada por el docente', 'error');
+    return;
+  }
+  document.getElementById('consulta-pass').value = '';
+  document.getElementById('consulta-login-step').style.display = 'block';
+  document.getElementById('consulta-result-step').style.display = 'none';
+  document.getElementById('modal-consulta').classList.add('open');
+}
+
+async function verificarYGenerarReporteIndividual(){
+  const nombre = document.getElementById('consulta-select-est').value;
+  const pass = document.getElementById('consulta-pass').value.trim();
+
+  if(!nombre) { showToast('Selecciona un estudiante', 'error'); return; }
+  if(!pass) { showToast('Ingresa la contraseña', 'error'); return; }
+
+  const claveGuardada = STATE.claves[nombre];
+  if(claveGuardada !== pass){
+    showToast('Contraseña incorrecta', 'error');
+    return;
   }
 
-  function cerrarSesionDocente() {
-    document.getElementById('view-docente').classList.add('hidden');
-    document.getElementById('view-login').classList.remove('hidden');
-  }
+  showToast('Cargando reporte...', 'success');
 
-  function mostrarAlerta(msg, type) {
-    const el = document.getElementById('status-alert');
-    el.className = `alert alert-${type === 'danger' ? 'danger' : 'success'}`;
-    el.textContent = msg;
-    el.classList.remove('hidden');
-  }
+  try {
+    const r = await fetch(`${GAS_URL}?action=getReporteEstudiante&estudiante=${encodeURIComponent(nombre)}`);
+    const data = await r.json();
 
-  function ocultarAlerta() {
-    document.getElementById('status-alert').classList.add('hidden');
+    if(data.success && data.resultados){
+      poblarReporteVisual(nombre, data.resultados);
+      document.getElementById('consulta-login-step').style.display = 'none';
+      document.getElementById('consulta-result-step').style.display = 'block';
+    } else {
+      showToast('No se encontraron respuestas registradas aún', 'error');
+    }
+  } catch(e) {
+    showToast('Error al obtener reporte del servidor', 'error');
   }
+}
+
+function poblarReporteVisual(nombre, datos){
+  document.getElementById('rep-pdf-estudiante').textContent = `Estudiante: ${nombre}`;
+  document.getElementById('rep-pdf-id').textContent = `ID VERIFICACIÓN: ${datos.idVerificacion || 'ST-' + Math.random().toString(36).substr(2,6).toUpperCase() + '-2026'}`;
+  document.getElementById('rep-pdf-global').textContent = `${datos.global || 0} / 500`;
+  document.getElementById('rep-pdf-percentil').textContent = `${datos.percentil || 0}%`;
+
+  const areas = [
+    { key: 'mat', val: datos.mat || 0 },
+    { key: 'lec', val: datos.lec || 0 },
+    { key: 'cn',  val: datos.cn || 0 },
+    { key: 'soc', val: datos.soc || 0 },
+    { key: 'ing', val: datos.ing || 0 }
+  ];
+
+  areas.forEach(a => {
+    document.getElementById(`rep-val-${a.key}`).textContent = a.val;
+    const badge = document.getElementById(`rep-badge-${a.key}`);
+    if(a.val >= 60){
+      badge.textContent = 'FORTALEZA';
+      badge.className = 'score-badge bueno';
+    } else {
+      badge.textContent = 'REFORZAR';
+      badge.className = 'score-badge reforzar';
+    }
+  });
+}
+
+function descargarReportePDFActual(){
+  const elemento = document.getElementById('contenedor-reporte-pdf');
+  const estNombre = document.getElementById('consulta-select-est').value || 'Estudiante';
+
+  const opciones = {
+    margin: [0.3, 0.3, 0.3, 0.3],
+    filename: `Certificado_SABER_TECH_${estNombre.replace(/\s+/g, '_')}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opciones).from(elemento).save();
+}
+
+/* ======================================================
+   GESTIÓN DOCENTE Y SALIDA
+====================================================== */
+
+function abrirModalDocente(){
+  document.getElementById('teacher-pass-input').value = '';
+  document.getElementById('teacher-auth-step').style.display = 'block';
+  document.getElementById('teacher-controls-step').style.display = 'none';
+  document.getElementById('btn-logout-teacher').style.display = 'none';
+  document.getElementById('modal-teacher').classList.add('open');
+}
+
+async function verificarDocente(){
+  const p = document.getElementById('teacher-pass-input').value.trim();
+  if(!p) { showToast('Ingresa la contraseña', 'error'); return; }
+
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'verifyTeacherPass', teacherPass: p })
+    });
+    const data = await r.json();
+    
+    if(data.success){
+      document.getElementById('teacher-auth-step').style.display = 'none';
+      document.getElementById('teacher-controls-step').style.display = 'block';
+      document.getElementById('btn-logout-teacher').style.display = 'inline-flex';
+      poblarCamposPanelDocente();
+    } else {
+      showToast(data.error || 'Contraseña incorrecta', 'error');
+    }
+  } catch(e) { showToast('Error de conexión con el servidor', 'error'); }
+}
+
+function cerrarSesionDocente(){
+  document.getElementById('teacher-pass-input').value = '';
+  document.getElementById('teacher-controls-step').style.display = 'none';
+  document.getElementById('btn-logout-teacher').style.display = 'none';
+  document.getElementById('teacher-auth-step').style.display = 'block';
+  cerrarModal('modal-teacher');
+  showToast('Sesión de administrador cerrada correctamente', 'success');
+}
+
+function poblarCamposPanelDocente(){
+  document.getElementById('cfg-protocolo').value = STATE.config.protocoloActivo || 'Protocolo 01';
+  document.getElementById('cfg-horas').value = STATE.config.horas || 4;
+  document.getElementById('cfg-minutos').value = STATE.config.minutos || 30;
+  document.getElementById('cfg-habilitar-reportes').checked = STATE.config.habilitarReportes || false;
+  
+  document.getElementById('cfg-s1-mat').value = STATE.config.s1.mat;
+  document.getElementById('cfg-s1-lec').value = STATE.config.s1.lec;
+  document.getElementById('cfg-s1-soc').value = STATE.config.s1.soc;
+  document.getElementById('cfg-s1-cn').value = STATE.config.s1.cn;
+
+  document.getElementById('cfg-s2-soc').value = STATE.config.s2.soc;
+  document.getElementById('cfg-s2-mat').value = STATE.config.s2.mat;
+  document.getElementById('cfg-s2-cn').value = STATE.config.s2.cn;
+  document.getElementById('cfg-s2-ing').value = STATE.config.s2.ing;
+
+  renderizarConfiguracionIngles();
+}
+
+function renderizarConfiguracionIngles(){
+  const count = parseInt(document.getElementById('cfg-s2-ing').value) || 45;
+  const soc = parseInt(document.getElementById('cfg-s2-soc').value) || 25;
+  const mat = parseInt(document.getElementById('cfg-s2-mat').value) || 25;
+  const cn = parseInt(document.getElementById('cfg-s2-cn').value) || 29;
+  const startOffset = soc + mat + cn; // Offset: 79
+
+  const grid = document.getElementById('ingles-questions-grid');
+  grid.innerHTML = '';
+
+  for(let i = 1; i <= count; i++){
+    const pregNum = startOffset + i;
+    const qKey = `P${pregNum}`;
+    const optsActuales = (STATE.config.inglesMap && STATE.config.inglesMap[qKey]) ? STATE.config.inglesMap[qKey].join(',') : 'A,B,C,D';
+
+    const div = document.createElement('div');
+    div.className = 'ingles-item';
+    div.innerHTML = `
+      <span style="font-weight:900; font-size:0.75rem;">${qKey} (${i})</span>
+      <select class="form-select cfg-ing-select" data-qkey="${qKey}" style="padding:0.2rem; font-size:0.7rem;">
+        <option value="A,B,C" ${optsActuales === 'A,B,C' ? 'selected' : ''}>3 Opciones (A,B,C)</option>
+        <option value="A,B,C,D" ${optsActuales === 'A,B,C,D' ? 'selected' : ''}>4 Opciones (A,B,C,D)</option>
+        <option value="A,B,C,D,E" ${optsActuales === 'A,B,C,D,E' ? 'selected' : ''}>5 Opciones (A,B,C,D,E)</option>
+        <option value="A,B,C,D,E,F,G,H" ${optsActuales === 'A,B,C,D,E,F,G,H' ? 'selected' : ''}>8 Opciones (A a H)</option>
+      </select>
+    `;
+    grid.appendChild(div);
+  }
+}
+
+function aplicarFormatoMasivoIngles(valor){
+  if(!valor) return;
+  document.querySelectorAll('.cfg-ing-select').forEach(sel => {
+    sel.value = valor;
+  });
+}
+
+function switchTeacherTab(tabId, el){
+  document.querySelectorAll('.teacher-tabs .t-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.t-content').forEach(c => c.style.display = 'none');
+  el.classList.add('active');
+  document.getElementById(tabId).style.display = 'block';
+}
+
+async function cargarReportesDocente(){
+  try {
+    const r = await fetch(GAS_URL + '?action=getReportes');
+    const data = await r.json();
+    if(data.success){
+      const tblR = document.querySelector('#tbl-respuestas tbody');
+      tblR.innerHTML = '';
+      data.respuestas.forEach(row => {
+        tblR.innerHTML += `<tr><td>${row.time.substring(0,10)}</td><td>${row.estudiante}</td><td>${row.grado}</td><td>${row.sesion}</td><td>${row.totalRespondidas}</td></tr>`;
+      });
+
+      const tblI = document.querySelector('#tbl-infracciones tbody');
+      tblI.innerHTML = '';
+      data.infracciones.forEach(row => {
+        tblI.innerHTML += `<tr><td>${row.time.substring(0,10)}</td><td>${row.estudiante}</td><td style="color:var(--red);font-weight:800;">${row.advertencias}</td></tr>`;
+      });
+    }
+  } catch(e){}
+}
+
+async function descargarInformeExcel(){
+  try {
+    showToast('Generando informe general...', 'success');
+    const r = await fetch(GAS_URL + '?action=getMatrizResultados');
+    const data = await r.json();
+    if(data.success && data.matriz){
+      let csvContent = "\uFEFF"; 
+      data.matriz.forEach(rowArray => {
+        let row = rowArray.map(item => `"${(item || '').toString().replace(/"/g, '""')}"`).join(";");
+        csvContent += row + "\r\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Informe_General_SABER_TECH_${new Date().toISOString().substring(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      showToast('No hay resultados para exportar', 'error');
+    }
+  } catch(e) { showToast('Error al descargar el informe', 'error'); }
+}
+
+async function guardarConfiguracionDocente(){
+  const pass = document.getElementById('teacher-pass-input').value.trim();
+
+  const inglesMap = {};
+  document.querySelectorAll('.cfg-ing-select').forEach(sel => {
+    const key = sel.getAttribute('data-qkey');
+    inglesMap[key] = sel.value.split(',');
+  });
+
+  const newSettings = {
+    protocoloActivo: document.getElementById('cfg-protocolo').value,
+    horas: parseInt(document.getElementById('cfg-horas').value) || 0,
+    minutos: parseInt(document.getElementById('cfg-minutos').value) || 0,
+    habilitarReportes: document.getElementById('cfg-habilitar-reportes').checked,
+    s1: {
+      mat: parseInt(document.getElementById('cfg-s1-mat').value) || 0,
+      lec: parseInt(document.getElementById('cfg-s1-lec').value) || 0,
+      soc: parseInt(document.getElementById('cfg-s1-soc').value) || 0,
+      cn: parseInt(document.getElementById('cfg-s1-cn').value) || 0
+    },
+    s2: {
+      soc: parseInt(document.getElementById('cfg-s2-soc').value) || 0,
+      mat: parseInt(document.getElementById('cfg-s2-mat').value) || 0,
+      cn: parseInt(document.getElementById('cfg-s2-cn').value) || 0,
+      ing: parseInt(document.getElementById('cfg-s2-ing').value) || 0
+    },
+    inglesMap: inglesMap
+  };
+
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'saveConfig', settings: newSettings, teacherPass: pass })
+    });
+    const data = await r.json();
+    if(data.success){
+      STATE.config = newSettings;
+      document.getElementById('label-protocolo-activo').textContent = newSettings.protocoloActivo;
+      actualizarEstadoBotonReporte();
+      showToast('Configuración guardada en la nube', 'success');
+      cerrarModal('modal-teacher');
+    } else {
+      showToast(data.error || 'Error al guardar', 'error');
+    }
+  } catch(e){ showToast('Error de conexión', 'error'); }
+}
+
+function cerrarReporteYSalir(){
+  cerrarModal('modal-report');
+  mostrarScreen('screen-login');
+}
+
+function mostrarScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function cerrarModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function showToast(msg, type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 </script>
 </body>
 </html>
